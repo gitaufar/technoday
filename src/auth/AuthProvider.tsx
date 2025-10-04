@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import supabase from '@/utils/supabase'
 
 type Role = 'procurement' | 'legal' | 'management'
-type Profile = { id: string; email: string | null; full_name: string | null; role: Role }
+type Profile = { id: string; email: string | null; full_name: string | null; role: Role; created_at: string; company_id: string | null }
 type SessionLike = { user: { id: string; email: string | null } } | null
 
 type AuthCtx = {
@@ -12,6 +12,7 @@ type AuthCtx = {
   role: Role | null
   loading: boolean
   signOut: () => Promise<void>
+  isOwner: boolean
 }
 
 const defaultCtx: AuthCtx = {
@@ -20,6 +21,7 @@ const defaultCtx: AuthCtx = {
   role: null,
   loading: true,
   signOut: async () => {},
+  isOwner: false
 }
 
 const Ctx = createContext<AuthCtx>(defaultCtx)
@@ -30,10 +32,17 @@ async function fetchProfile(userId: string) {
   return data as Profile | null
 }
 
+async function checkIfOwner(userId: string) {
+  const { data, error } = await supabase.from('companies').select('owner_id').eq('owner_id', userId).maybeSingle();
+  if (error) throw error;
+  return data ? true : false;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<SessionLike>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isOwner, setIsOwner] = useState(false);
 
   const load = async () => {
     setLoading(true)
@@ -44,6 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const fetched = await fetchProfile(currentSession.user.id)
         setProfile(fetched)
+        const fetchedIsOwner = await checkIfOwner(currentSession.user.id);
+        setIsOwner(fetchedIsOwner);
+        console.log("User ID:", currentSession.user.id);
+        console.log("Is user owner?", fetchedIsOwner);
       } catch (err) {
         console.error('Failed loading profile', err)
         setProfile(null)
@@ -73,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut()
       await load()
     },
+    isOwner
   }), [session, profile, loading])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

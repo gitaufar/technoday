@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import supabase from '@/utils/supabase'
 import { useAuth } from '@/auth/AuthProvider'
-import { Navbar } from '@/components/Navbar'
 
 type Role = 'procurement' | 'legal' | 'management'
 
@@ -78,7 +77,6 @@ export default function Login() {
 
   return (
     <main className="min-h-screen bg-[#F5F7FA]">
-      <Navbar />
       <div className="mx-auto flex min-h-screen max-w-6xl flex-col gap-12 px-6 py-16 lg:flex-row lg:items-center lg:justify-between">
         <section className="space-y-6">
           <span className="inline-flex items-center gap-2 rounded-full bg-[#357ABD]/10 px-4 py-1 text-[#357ABD] text-sm font-semibold">OptiMind Contract Suite</span>
