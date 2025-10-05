@@ -11,8 +11,12 @@ import Signup from './routes/auth/Signup'
 import OAuthCallback from './routes/auth/Callback'
 import SelectRole from './routes/auth/SelectRole'
 
-// Owner
+// Null Layout for new users
 import NullLayout from './routes/null/layout'
+import NullDashboard from './routes/null/Dashboard'
+import Create from './routes/null/Create'
+
+// Owner
 import OwnerLayout from './routes/owner/layout'
 
 // Procurement
@@ -56,7 +60,8 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <div>Create Your First Project</div> },
+      { index: true, element: <NullDashboard /> },
+      { path: 'Create', element: <Create /> },
     ],
   },
   {
