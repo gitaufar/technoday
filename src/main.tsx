@@ -45,6 +45,10 @@ import {
 } from './routes/management'
 import ManagementContractDetail from './routes/management/ContractDetail'
 import { LandingPage } from './routes/common/LandingPage'
+import { TeamOwner } from './routes/owner/TeamOwner'
+import { DashboardOwner } from './routes/owner/DashboardOwner'
+import { BillingOwner } from './routes/owner/BillingOwner'
+import { SettingOwner } from './routes/owner/SettingOwner'
 
 const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -72,10 +76,10 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <div>Owner Dashboard</div> },
-      { path: 'team', element: <div>Owner Team</div> },
-      { path: 'billing', element: <div>Owner Billing</div> },
-      { path: 'settings', element: <div>Owner Settings</div> },
+      { index: true, element: <DashboardOwner /> },
+      { path: 'team', element: <TeamOwner /> },
+      { path: 'billing', element: <BillingOwner /> },
+      { path: 'settings', element: <SettingOwner /> },
     ],
   },
   {
