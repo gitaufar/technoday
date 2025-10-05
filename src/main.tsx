@@ -15,6 +15,7 @@ import SelectRole from './routes/auth/SelectRole'
 import NullLayout from './routes/null/layout'
 import NullDashboard from './routes/null/Dashboard'
 import Create from './routes/null/Create'
+import Payment from './routes/null/Payment'
 
 // Owner
 import OwnerLayout from './routes/owner/layout'
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <NullDashboard /> },
       { path: 'Create', element: <Create /> },
+      { path: 'payment', element: <Payment /> },
     ],
   },
   {

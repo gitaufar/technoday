@@ -27,6 +27,7 @@ export default function CreateNewCompany() {
   }
 
   const handleCreateCompany = () => {
+    navigate('/create-project/payment')
     console.log('Creating company with data:', formData)
     // Logic untuk create company
   }
