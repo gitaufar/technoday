@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
 import type { ReactElement } from 'react'
 
-type Role = 'procurement' | 'legal' | 'management'
+type Role = 'procurement' | 'legal' | 'management' | 'owner'
 
 type Props = {
   children: ReactElement
@@ -22,7 +22,10 @@ export default function ProtectedRoute({ children, allow }: Props) {
   }
 
   if (allow && role && !allow.includes(role)) {
-    const redirect = role === 'legal' ? '/legal' : role === 'management' ? '/management' : '/procurement'
+    const redirect = role === 'legal' ? '/legal' 
+                   : role === 'management' ? '/management' 
+                   : role === 'procurement' ? '/procurement'
+                   : '/owner'
     return <Navigate to={redirect} replace />
   }
 

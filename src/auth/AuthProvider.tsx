@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import supabase from '@/utils/supabase'
 
-type Role = 'procurement' | 'legal' | 'management'
+type Role = 'procurement' | 'legal' | 'management' | 'owner'
 type Profile = { id: string; email: string | null; full_name: string | null; role: Role; created_at: string; company_id: string | null }
 type SessionLike = { user: { id: string; email: string | null } } | null
 
@@ -53,8 +53,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentSession?.user?.id) {
       try {
         const fetched = await fetchProfile(currentSession.user.id)
-        setProfile(fetched)
         const fetchedIsOwner = await checkIfOwner(currentSession.user.id);
+        
+        // Jika belum ada profile, create dengan role owner sebagai default
+        if (!fetched) {
+          const { data: newProfile } = await supabase
+            .from('profiles')
+            .insert({
+              id: currentSession.user.id,
+              email: currentSession.user.email,
+              role: 'owner'
+            })
+            .select()
+            .single();
+          setProfile(newProfile);
+        } else if (fetchedIsOwner && fetched.role !== 'owner') {
+          // Jika user adalah owner tapi role bukan owner, update role
+          const { data: updatedProfile } = await supabase
+            .from('profiles')
+            .update({ role: 'owner' })
+            .eq('id', currentSession.user.id)
+            .select()
+            .single();
+          setProfile(updatedProfile);
+        } else {
+          setProfile(fetched);
+        }
+        
         setIsOwner(fetchedIsOwner);
         console.log("User ID:", currentSession.user.id);
         console.log("Is user owner?", fetchedIsOwner);
@@ -81,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthCtx>(() => ({
     session,
     profile,
-    role: profile?.role ?? null,
+    role: profile?.role ?? 'owner', // Default ke owner jika tidak ada role
     loading,
     signOut: async () => {
       await supabase.auth.signOut()

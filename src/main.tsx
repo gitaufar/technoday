@@ -11,6 +11,9 @@ import Signup from './routes/auth/Signup'
 import OAuthCallback from './routes/auth/Callback'
 import SelectRole from './routes/auth/SelectRole'
 
+// Owner
+import OwnerLayout from './routes/owner/layout'
+
 // Procurement
 import ProcurementLayout from './routes/procurement/Layout'
 import ProcurementDashboard from './routes/procurement/Dashboard'
@@ -44,6 +47,20 @@ const router = createBrowserRouter([
   { path: '/auth/signup', element: <Signup /> },
   { path: '/auth/select-role', element: <SelectRole /> },
   { path: '/auth/callback', element: <OAuthCallback /> },
+  {
+    path: '/owner',
+    element: (
+      <ProtectedRoute allow={['owner']}>
+        <OwnerLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <div>Owner Dashboard</div> },
+      { path: 'team', element: <div>Owner Team</div> },
+      { path: 'billing', element: <div>Owner Billing</div> },
+      { path: 'settings', element: <div>Owner Settings</div> },
+    ],
+  },
   {
     path: '/procurement',
     element: (

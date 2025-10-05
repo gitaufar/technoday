@@ -8,7 +8,10 @@ export default function OAuthCallback() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const destination = role === 'legal' ? '/legal' : role === 'management' ? '/management' : '/procurement'
+    const destination = role === 'legal' ? '/legal' 
+                      : role === 'management' ? '/management' 
+                      : role === 'procurement' ? '/procurement'
+                      : '/owner'
     const timer = setTimeout(() => navigate(destination, { replace: true }), 400)
     return () => clearTimeout(timer)
   }, [role, navigate])
