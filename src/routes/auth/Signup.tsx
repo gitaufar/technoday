@@ -90,6 +90,7 @@ export default function Signup() {
           className="w-full h-full object-cover"
           src="/login/signup_bg.svg"
           alt="Login Illustration"
+          loading="lazy"
         />
       </div>
 

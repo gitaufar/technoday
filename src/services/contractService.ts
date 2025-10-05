@@ -8,6 +8,7 @@ export interface Profile {
   full_name: string | null
   role: 'procurement' | 'legal' | 'manager'
   created_at: string
+  company_id: string | null
 }
 
 export interface RiskFinding {

@@ -47,6 +47,7 @@ export default function UploadContract() {
   const [meta, setMeta] = useState({ name: "", type: "", value_rp: 0 });
   const [valueInput, setValueInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { companyId } = useAuth();
 
   const latestContracts = useMemo(() => rows.slice(0, 3), [rows]);
 
@@ -83,6 +84,7 @@ export default function UploadContract() {
             value_rp: meta.value_rp || null,
             status: "Draft",
             created_by: session?.user?.id ?? null,
+            company_id: companyId ?? null,
           },
         ])
         .select("id")
@@ -116,6 +118,7 @@ export default function UploadContract() {
             value_rp: meta.value_rp || null,
             status: "Submitted",
             created_by: session?.user?.id ?? null,
+            company_id: companyId ?? null,
           },
         ])
         .select("id")

@@ -67,6 +67,7 @@ export default function Login() {
           className="w-full h-full object-cover"
           src="/login/login_bg.svg"
           alt="Login Illustration"
+          loading="lazy"
         />
       </div>
 

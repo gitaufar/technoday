@@ -39,8 +39,8 @@ export default function ManagementLayout() {
   }
 
   return (
-    <div className="flex max-w-screen bg-[#F5F7FA]">
-      <aside className="group w-[60px] overflow-hidden bg-white shadow-sm transition-all duration-300 hover:w-48">
+    <div className="flex h-screen overflow-hidden bg-[#F5F7FA]">
+      <aside className="group hidden h-screen w-[60px] flex-shrink-0 overflow-hidden bg-white shadow-sm transition-all duration-300 hover:w-48 md:block">
         <div className="flex h-full flex-col">
           <div className="flex items-center gap-2 px-3 py-4">
             <div className="grid h-8 w-8 place-items-center rounded-full bg-[#357ABD]/10 text-sm font-semibold text-[#357ABD]">
@@ -89,8 +89,8 @@ export default function ManagementLayout() {
           </nav>
         </div>
       </aside>
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center gap-3 bg-white px-4 py-3 shadow-sm">
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <header className="flex flex-shrink-0 items-center gap-3 bg-white px-4 py-3 shadow-sm">
           <div className="w-[60px]" aria-hidden />  
           
           <div className="flex flex-1 items-center justify-center">
