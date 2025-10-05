@@ -7,7 +7,7 @@ import AuthInputField from "@/components/auth/AuthInputField";
 import { User, AtSign, Lock } from "lucide-react";
 
 export default function Signup() {
-  const { session } = useAuth();
+  const { session, role } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -21,7 +21,17 @@ export default function Signup() {
   // Redirect if already logged in
   useEffect(() => {
     if (session) {
-      navigate("/dashboard", { replace: true });
+      if (role === 'procurement') {
+        navigate("/procurement", { replace: true });
+      } else if (role === 'legal') {
+        navigate("/legal", { replace: true });
+      } else if (role === 'management') {
+        navigate("/management", { replace: true });
+      } else if (role === 'owner') {
+        navigate("/owner", { replace: true });
+      } else {
+        navigate("/create-project", { replace: true });
+      }
     }
   }, [session, navigate]);
 

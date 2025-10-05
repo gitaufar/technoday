@@ -21,6 +21,10 @@ export default function ProtectedRoute({ children, allow }: Props) {
     return <Navigate to="/auth/login" replace />
   }
 
+  if (isOwner) {
+    return children
+  }
+
   if (allow && !allow.includes(role)) {
     const redirect = role === 'legal' ? '/legal' 
                    : role === 'management' ? '/management' 
@@ -30,9 +34,9 @@ export default function ProtectedRoute({ children, allow }: Props) {
     return <Navigate to={redirect} replace />
   }
 
-  // If no role and not owner, redirect to dashboard
+  // If no role and not owner, redirect to create project
   if (allow && !role) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/create-project" replace />
   }
 
   return children

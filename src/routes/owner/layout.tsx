@@ -40,7 +40,7 @@ export default function OwnerLayout() {
 
   return (
     <div className="flex max-w-screen bg-[#F5F7FA]">
-      <aside className="group w-[60px] overflow-hidden bg-white shadow-sm transition-all duration-300 hover:w-48">
+      <aside className="group w-[60px] min-h-screen overflow-hidden bg-white shadow-sm transition-all duration-300 hover:w-48">
         <div className="flex h-full flex-col">
           <div className="flex items-center gap-2 px-3 py-4">
             <div className="grid h-8 w-8 place-items-center rounded-full bg-[#357ABD]/10 text-sm font-semibold text-[#357ABD]">

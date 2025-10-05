@@ -7,7 +7,7 @@ import AuthInputField from "@/components/auth/AuthInputField";
 import { AtSign, Lock } from "lucide-react";
 
 export default function Login() {
-  const { session, loading: authLoading } = useAuth();
+  const { session, loading: authLoading, role } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,7 +16,17 @@ export default function Login() {
 
   useEffect(() => {
     if (!authLoading && session) {
-      navigate("/dashboard", { replace: true });
+      if (role === 'procurement') {
+        navigate("/procurement", { replace: true });
+      } else if (role === 'legal') {
+        navigate("/legal", { replace: true });
+      } else if (role === 'management') {
+        navigate("/management", { replace: true });
+      } else if (role === 'owner') {
+        navigate("/owner", { replace: true });
+      } else {
+        navigate("/create-project", { replace: true });
+      }
     }
   }, [session, authLoading, navigate]);
 
@@ -36,8 +46,17 @@ export default function Login() {
         return;
       }
 
-      // Redirect to dashboard after successful login
-      navigate("/dashboard", { replace: true });
+      if (role === 'procurement') {
+        navigate("/procurement", { replace: true });
+      } else if (role === 'legal') {
+        navigate("/legal", { replace: true });
+      } else if (role === 'management') {
+        navigate("/management", { replace: true });
+      } else if (role === 'owner') {
+        navigate("/owner", { replace: true });
+      } else {
+        navigate("/create-project", { replace: true });
+      }
     } finally {
       setSubmitting(false);
     }
