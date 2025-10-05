@@ -38,6 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const load = async () => {
     setLoading(true)
     const { data } = await supabase.auth.getSession()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const currentSession = (data?.session as any) ?? null
     setSession(currentSession)
     if (currentSession?.user?.id) {
@@ -78,4 +79,5 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(Ctx)
