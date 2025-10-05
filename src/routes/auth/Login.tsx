@@ -6,21 +6,8 @@ import { useAuth } from "@/auth/AuthProvider";
 import AuthInputField from "@/components/auth/AuthInputField";
 import { AtSign, Lock } from "lucide-react";
 
-type Role = "procurement" | "legal" | "management";
-
-const ROLE_ROUTE: Record<Role, string> = {
-  procurement: "/procurement",
-  legal: "/legal",
-  management: "/management",
-};
-
-function resolveRoute(role: Role | null | undefined) {
-  if (!role) return "/procurement";
-  return ROLE_ROUTE[role];
-}
-
 export default function Login() {
-  const { session, role, loading: authLoading } = useAuth();
+  const { session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,10 +15,10 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!authLoading && session && role) {
-      navigate(resolveRoute(role), { replace: true });
+    if (!authLoading && session) {
+      navigate("/dashboard", { replace: true });
     }
-  }, [session, role, authLoading, navigate]);
+  }, [session, authLoading, navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,37 +26,18 @@ export default function Login() {
     setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
+
       if (error) {
         setError(error.message);
         return;
       }
 
-      const userId = data?.user?.id;
-      if (userId) {
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", userId)
-          .maybeSingle();
-
-        if (!profileError) {
-          const dbRole = profile?.role;
-          const nextRole: Role | null =
-            dbRole === "legal" ||
-            dbRole === "management" ||
-            dbRole === "procurement"
-              ? dbRole
-              : role ?? null;
-          navigate(resolveRoute(nextRole), { replace: true });
-          return;
-        }
-      }
-
-      navigate(resolveRoute(role), { replace: true });
+      // Redirect to dashboard after successful login
+      navigate("/dashboard", { replace: true });
     } finally {
       setSubmitting(false);
     }
@@ -90,14 +58,19 @@ export default function Login() {
         alt="Bubble"
       />
       <div className="relative w-[55%] overflow-hidden">
+        <div className="absolute z-10 w-full h-full px-12 py-12">
+          <p className="text-6xl leading-normal text-white font-bold">
+            Streamline Your <br /><span className="text-secondary">Contracts.</span> <br />Empower Your <br /><span className="text-secondary">Decisions.</span>
+          </p>
+        </div>
         <img
           className="w-full h-full object-cover"
           src="/login/login_bg.svg"
           alt="Login Illustration"
         />
       </div>
-      
-      <div className="flex-1 flex items-center justify-center px-8 py-12 bg-gray-50">
+
+      <div className="flex-1 flex items-center justify-center px-8 py-12">
         <div className="w-full max-w-lg">
           <form
             onSubmit={handleSubmit}
@@ -170,7 +143,9 @@ export default function Login() {
                 <div className="w-full border-t border-gray-200"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white text-gray-500">or continue with</span>
+                <span className="px-4 bg-white text-gray-500">
+                  or continue with
+                </span>
               </div>
             </div>
 
@@ -198,7 +173,9 @@ export default function Login() {
                     d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                   />
                 </svg>
-                <span className="text-gray-700 font-medium">Continue with Google</span>
+                <span className="text-gray-700 font-medium">
+                  Continue with Google
+                </span>
               </button>
 
               <button
@@ -208,7 +185,9 @@ export default function Login() {
                 <svg className="w-5 h-5" fill="#0A66C2" viewBox="0 0 24 24">
                   <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
                 </svg>
-                <span className="text-gray-700 font-medium">Continue with LinkedIn</span>
+                <span className="text-gray-700 font-medium">
+                  Continue with LinkedIn
+                </span>
               </button>
             </div>
           </form>

@@ -3,7 +3,14 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import supabase from '@/utils/supabase'
 
 type Role = 'procurement' | 'legal' | 'management'
-type Profile = { id: string; email: string | null; full_name: string | null; role: Role; created_at: string; company_id: string | null }
+type Profile = { 
+  id: string; 
+  email: string | null; 
+  full_name: string | null; 
+  role: Role | null;  // Allow NULL role for users without company
+  created_at: string; 
+  company_id: string | null 
+}
 type SessionLike = { user: { id: string; email: string | null } } | null
 
 type AuthCtx = {
