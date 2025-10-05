@@ -22,7 +22,7 @@ const socials = [
 
 export const FooterSection = () => {
   return (
-    <footer className="relative overflow-hidden bg-[#0b1424] text-slate-300">
+    <footer id="footer" className="relative overflow-hidden bg-[#0b1424] text-slate-300 scroll-mt-24">
       <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.25fr_1fr_1fr_0.8fr]">
           <div className="space-y-5">
