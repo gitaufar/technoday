@@ -12,6 +12,7 @@ import OAuthCallback from './routes/auth/Callback'
 import SelectRole from './routes/auth/SelectRole'
 
 // Owner
+import NullLayout from './routes/null/layout'
 import OwnerLayout from './routes/owner/layout'
 
 // Procurement
@@ -47,6 +48,17 @@ const router = createBrowserRouter([
   { path: '/auth/signup', element: <Signup /> },
   { path: '/auth/select-role', element: <SelectRole /> },
   { path: '/auth/callback', element: <OAuthCallback /> },
+  {
+    path: '/create-project',
+    element: (
+      <ProtectedRoute allow={[null]}>
+        <NullLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <div>Create Your First Project</div> },
+    ],
+  },
   {
     path: '/owner',
     element: (

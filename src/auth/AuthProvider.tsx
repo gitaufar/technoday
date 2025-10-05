@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import supabase from '@/utils/supabase'
 
-type Role = 'procurement' | 'legal' | 'management' | 'owner'
+type Role = 'procurement' | 'legal' | 'management' | 'owner' | null
 type Profile = { id: string; email: string | null; full_name: string | null; role: Role; created_at: string; company_id: string | null }
 type SessionLike = { user: { id: string; email: string | null } } | null
 
@@ -55,27 +55,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const fetched = await fetchProfile(currentSession.user.id)
         const fetchedIsOwner = await checkIfOwner(currentSession.user.id);
         
-        // Jika belum ada profile, create dengan role owner sebagai default
+        // Jika belum ada profile, create dengan role null sebagai default
         if (!fetched) {
           const { data: newProfile } = await supabase
             .from('profiles')
             .insert({
               id: currentSession.user.id,
               email: currentSession.user.email,
-              role: 'owner'
+              role: null
             })
             .select()
             .single();
           setProfile(newProfile);
-        } else if (fetchedIsOwner && fetched.role !== 'owner') {
-          // Jika user adalah owner tapi role bukan owner, update role
-          const { data: updatedProfile } = await supabase
-            .from('profiles')
-            .update({ role: 'owner' })
-            .eq('id', currentSession.user.id)
-            .select()
-            .single();
-          setProfile(updatedProfile);
         } else {
           setProfile(fetched);
         }
@@ -106,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AuthCtx>(() => ({
     session,
     profile,
-    role: profile?.role ?? 'owner', // Default ke owner jika tidak ada role
+    role: profile?.role ?? null,
     loading,
     signOut: async () => {
       await supabase.auth.signOut()
