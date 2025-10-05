@@ -3,12 +3,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Sparkles, Shield, TrendingUp, Zap } from "lucide-react";
+import PaymentTemplate from "@/components/Payment/Template";
+import { plans } from "@/components/Payment/item";
 
 export default function ChooseYourPlan() {
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState<
     "starter" | "professional" | "enterprise"
   >("starter");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPlanForPayment, setSelectedPlanForPayment] = useState(
+    plans[0]
+  );
 
   const handlePlanSelect = (
     plan: "starter" | "professional" | "enterprise"
@@ -16,16 +22,15 @@ export default function ChooseYourPlan() {
     setSelectedPlan(plan);
   };
 
+  const handleSubscribeNow = (planType: string) => {
+    const plan = plans.find((p) => p.id === planType) || plans[0];
+    setSelectedPlanForPayment(plan);
+    setShowPaymentModal(true);
+  };
+
   const handleStartFreePlan = () => {
     // Logic untuk start free plan
     console.log("Starting free plan");
-    // Navigate to owner dashboard after selecting plan
-    navigate("/owner");
-  };
-
-  const handleSubscribeNow = (plan: string) => {
-    // Logic untuk subscribe to paid plan
-    console.log(`Subscribing to ${plan}`);
     // Navigate to owner dashboard after selecting plan
     navigate("/owner");
   };
@@ -146,7 +151,6 @@ export default function ChooseYourPlan() {
 
           {/* Enterprise Plan */}
           <div className="rounded-2xl border-2 border-slate-200 bg-white p-6 space-y-6">
-
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-slate-900">
@@ -261,6 +265,13 @@ export default function ChooseYourPlan() {
           </div>
         </div>
       </div>
+
+      <PaymentTemplate
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        selectedPlan={selectedPlanForPayment}
+        onSuccess={() => navigate("/owner")}
+      />
     </div>
   );
 }

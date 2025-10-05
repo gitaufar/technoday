@@ -12,13 +12,13 @@ import OAuthCallback from './routes/auth/Callback'
 import SelectRole from './routes/auth/SelectRole'
 
 // Null Layout for new users
-import NullLayout from './routes/null/layout'
+import NullLayout from './routes/null/Layout'
 import NullDashboard from './routes/null/Dashboard'
 import Create from './routes/null/Create'
 import Payment from './routes/null/Payment'
 
 // Owner
-import OwnerLayout from './routes/owner/layout'
+import OwnerLayout from './routes/owner/Layout'
 
 // Procurement
 import ProcurementLayout from './routes/procurement/Layout'
