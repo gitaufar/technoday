@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import supabase from '@/utils/supabase'
 
-type Role = 'procurement' | 'legal' | 'management'
+type Role = 'procurement' | 'legal' | 'management' | 'owner' | null
 type Profile = { 
   id: string; 
   email: string | null; 
@@ -19,7 +19,6 @@ type AuthCtx = {
   role: Role | null
   loading: boolean
   signOut: () => Promise<void>
-  companyId: string | null
   isOwner: boolean
 }
 
@@ -27,7 +26,6 @@ const defaultCtx: AuthCtx = {
   session: null,
   profile: null,
   role: null,
-  companyId: null,
   loading: true,
   signOut: async () => {},
   isOwner: false
@@ -62,8 +60,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentSession?.user?.id) {
       try {
         const fetched = await fetchProfile(currentSession.user.id)
-        setProfile(fetched)
         const fetchedIsOwner = await checkIfOwner(currentSession.user.id);
+        
+        // Jika belum ada profile, create dengan role null sebagai default
+        if (!fetched) {
+          const { data: newProfile } = await supabase
+            .from('profiles')
+            .insert({
+              id: currentSession.user.id,
+              email: currentSession.user.email,
+              role: null
+            })
+            .select()
+            .single();
+          setProfile(newProfile);
+        } else {
+          setProfile(fetched);
+        }
+        
         setIsOwner(fetchedIsOwner);
         console.log("User ID:", currentSession.user.id);
         console.log("Is user owner?", fetchedIsOwner);
@@ -92,7 +106,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     role: profile?.role ?? null,
     loading,
-    companyId: profile?.company_id ?? null,
     signOut: async () => {
       await supabase.auth.signOut()
       await load()

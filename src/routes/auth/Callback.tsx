@@ -8,7 +8,11 @@ export default function OAuthCallback() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const destination = role === 'legal' ? '/legal' : role === 'management' ? '/management' : '/procurement'
+    const destination = role === 'legal' ? '/legal' 
+                      : role === 'management' ? '/management' 
+                      : role === 'procurement' ? '/procurement'
+                      : role === 'owner' ? '/owner'
+                      : '/create-project' // Default untuk role null
     const timer = setTimeout(() => navigate(destination, { replace: true }), 400)
     return () => clearTimeout(timer)
   }, [role, navigate])

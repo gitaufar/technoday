@@ -11,6 +11,14 @@ import Signup from './routes/auth/Signup'
 import OAuthCallback from './routes/auth/Callback'
 import SelectRole from './routes/auth/SelectRole'
 
+// Null Layout for new users
+import NullLayout from './routes/null/layout'
+import NullDashboard from './routes/null/Dashboard'
+import Create from './routes/null/Create'
+
+// Owner
+import OwnerLayout from './routes/owner/layout'
+
 // Procurement
 import ProcurementLayout from './routes/procurement/Layout'
 import ProcurementDashboard from './routes/procurement/Dashboard'
@@ -51,6 +59,32 @@ const router = createBrowserRouter([
   //     </ProtectedRoute>
   //   ),
   // },
+  {
+    path: '/create-project',
+    element: (
+      <ProtectedRoute allow={[null]}>
+        <NullLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <NullDashboard /> },
+      { path: 'Create', element: <Create /> },
+    ],
+  },
+  {
+    path: '/owner',
+    element: (
+      <ProtectedRoute allow={['owner']}>
+        <OwnerLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <div>Owner Dashboard</div> },
+      { path: 'team', element: <div>Owner Team</div> },
+      { path: 'billing', element: <div>Owner Billing</div> },
+      { path: 'settings', element: <div>Owner Settings</div> },
+    ],
+  },
   {
     path: '/procurement',
     element: (
