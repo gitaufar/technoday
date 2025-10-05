@@ -31,15 +31,15 @@ export const FeatureSection = () => {
   return (
     <section id="features" className="relative isolate bg-gradient-to-r from-white via-white to-blue-50/50 py-24 scroll-mt-24">
       {/* Decorative bubbles */}
-      <div className="pointer-events-none absolute right-[-140px] top-[-160px] h-[420px] w-[420px] rounded-full bg-blue-200/30 blur-[120px]" />
-      <div className="pointer-events-none absolute right-[120px] top-10 h-[220px] w-[220px] rounded-full bg-blue-200/50 blur-[80px]" />
-      <div className="pointer-events-none absolute right-[-60px] bottom-[-120px] h-[360px] w-[360px] rounded-full bg-slate-200/40 blur-[120px]" />
-      <div className="pointer-events-none absolute left-[-180px] bottom-[-120px] h-[320px] w-[320px] rounded-full bg-blue-100/30 blur-[120px]" />
+      <div className="animate-float-slow pointer-events-none absolute right-[6vw] sm:right-[8vw] lg:right-[10vw] top-[-140px] sm:top-[-180px] h-[280px] w-[280px] sm:h-[380px] sm:w-[380px] lg:h-[46vw] lg:w-[46vw] xl:h-[36vw] xl:w-[36vw] rounded-full bg-blue-200/30 blur-[140px]" />
+      <div className="animate-float-delayed pointer-events-none absolute right-[14vw] sm:right-[16vw] lg:right-[20vw] top-[16vh] h-[200px] w-[200px] sm:h-[260px] sm:w-[260px] lg:h-[32vw] lg:w-[32vw] xl:h-[26vw] xl:w-[26vw] rounded-full bg-blue-200/50 blur-[120px]" />
+      <div className="animate-float-reverse pointer-events-none absolute right-[10vw] sm:right-[12vw] lg:right-[16vw] bottom-[-80px] sm:bottom-[-120px] h-[260px] w-[260px] sm:h-[340px] sm:w-[340px] lg:h-[36vw] lg:w-[36vw] xl:h-[30vw] xl:w-[30vw] rounded-full bg-slate-200/40 blur-[140px]" />
+      <div className="animate-float-soft pointer-events-none absolute left-[-6vw] sm:left-[-2vw] lg:left-[4vw] bottom-[-80px] sm:bottom-[-120px] h-[240px] w-[240px] sm:h-[320px] sm:w-[320px] lg:h-[34vw] lg:w-[34vw] xl:h-[28vw] xl:w-[28vw] rounded-full bg-blue-100/30 blur-[140px]" />
 
       <img
         src="/landingpage/bubble.svg"
         alt="floating bubbles"
-        className="pointer-events-none absolute -top-44 right-0 w-[660px] max-w-none translate-x-1/4"
+        className="animate-orbit pointer-events-none absolute -top-48 right-[-6vw] w-[90vw] max-w-[960px]"
       />
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
@@ -75,4 +75,5 @@ export const FeatureSection = () => {
     </section>
   )
 }
+
 

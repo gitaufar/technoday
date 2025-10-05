@@ -110,7 +110,7 @@ export const Navbar = () => {
 
       <nav className={`fixed top-0 z-30 w-full border-b transition-all duration-500 ${
         scrolled 
-          ? "border-slate-200/50 bg-white/70 backdrop-blur-xl shadow-lg shadow-slate-200/30" 
+          ? "border-white/20 bg-white/40 backdrop-blur-2xl shadow-lg shadow-slate-200/20" 
           : "border-slate-100 bg-white/90 backdrop-blur-md"
       }`}>
         <div className={`mx-auto flex max-w-6xl items-center justify-between px-6 transition-all duration-500 sm:px-8 lg:px-12 ${

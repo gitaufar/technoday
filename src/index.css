@@ -26,7 +26,6 @@ body {
     sans-serif;
   background-color: #f5f7fa;
   color: #111827;
-  overflow-x: hidden;
 }
 
 a {
@@ -203,5 +202,6 @@ a {
     transform: translateY(-6px);
   }
 }
+
 
 

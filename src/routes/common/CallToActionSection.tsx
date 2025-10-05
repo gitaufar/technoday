@@ -1,16 +1,16 @@
 export const CallToActionSection = () => {
   return (
-    <section id="get-started" className="relative overflow-hidden bg-[#4376C6] py-16 sm:py-20 scroll-mt-24">
-      <img
-        src="/landingpage/bubble3.svg"
-        alt="floating bubbles"
-        className="pointer-events-none absolute -top-40 -left-28 w-[520px] opacity-85"
-      />
-      <img
-        src="/landingpage/bubble3.svg"
-        alt="floating bubbles"
-        className="pointer-events-none absolute -bottom-20 -left-16 w-[380px] opacity-70"
-      />
+    <section id="get-started" className="relative bg-[#4376C6] py-16 sm:py-20 scroll-mt-24">
+      <div
+        className="animate-float-slow pointer-events-none absolute top-1/2 left-[-22vw] sm:left-[-14vw] lg:left-[-6vw] -translate-y-1/2 w-[560px] sm:w-[760px] lg:w-[72vw] xl:w-[58vw] 2xl:w-[50vw]"
+      >
+        <div className="absolute inset-0 rounded-full bg-white/55 blur-[260px] opacity-90" />
+        <img
+          src="/landingpage/bubble.svg"
+          alt="floating bubble"
+          className="relative w-full mix-blend-screen opacity-95 drop-shadow-[0_0_160px_rgba(255,255,255,0.5)]"
+        />
+      </div>
 
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
         <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -31,3 +31,6 @@ export const CallToActionSection = () => {
     </section>
   )
 }
+
+
+
