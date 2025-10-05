@@ -29,7 +29,7 @@ const features = [
 
 export const FeatureSection = () => {
   return (
-    <section className="relative isolate bg-gradient-to-r from-white via-white to-blue-50/50 py-24">
+    <section id="features" className="relative isolate bg-gradient-to-r from-white via-white to-blue-50/50 py-24 scroll-mt-24">
       {/* Decorative bubbles */}
       <div className="pointer-events-none absolute right-[-140px] top-[-160px] h-[420px] w-[420px] rounded-full bg-blue-200/30 blur-[120px]" />
       <div className="pointer-events-none absolute right-[120px] top-10 h-[220px] w-[220px] rounded-full bg-blue-200/50 blur-[80px]" />

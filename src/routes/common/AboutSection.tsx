@@ -1,6 +1,6 @@
 export const AboutSection = () => {
   return (
-    <section className="bg-black/40 relative h-screen overflow-hidden">
+    <section id="home" className="bg-black/40 relative h-screen overflow-hidden scroll-mt-28">
       <img
         src="./landingpage/about_bg.jpg"
         alt="About Section Image"

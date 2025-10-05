@@ -17,7 +17,7 @@ const benefits = [
 
 export const SolutionSection = () => {
   return (
-    <section className="relative overflow-hidden bg-blue-500 py-24">
+    <section id="solutions" className="relative overflow-hidden bg-blue-500 py-24 scroll-mt-24">
       <img
         src="/landingpage/solution_bg.jpg"
         alt="Glass building background"

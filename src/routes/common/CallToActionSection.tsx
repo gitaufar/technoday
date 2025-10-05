@@ -1,6 +1,6 @@
 export const CallToActionSection = () => {
   return (
-    <section className="relative overflow-hidden bg-[#4376C6] py-16 sm:py-20">
+    <section id="get-started" className="relative overflow-hidden bg-[#4376C6] py-16 sm:py-20 scroll-mt-24">
       <img
         src="/landingpage/bubble3.svg"
         alt="floating bubbles"
