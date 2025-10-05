@@ -18,6 +18,7 @@ type AuthCtx = {
   profile: Profile | null
   role: Role | null
   loading: boolean
+  companyId: string | null
   signOut: () => Promise<void>
   isOwner: boolean
 }
@@ -26,6 +27,7 @@ const defaultCtx: AuthCtx = {
   session: null,
   profile: null,
   role: null,
+  companyId: null,
   loading: true,
   signOut: async () => {},
   isOwner: false
@@ -106,6 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     role: profile?.role ?? null,
     loading,
+    companyId: profile?.company_id ?? null,
     signOut: async () => {
       await supabase.auth.signOut()
       await load()
