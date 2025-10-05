@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import { useAuth } from '@/auth/AuthProvider'
 import Logo from '@/assets/logo.svg'
@@ -26,7 +26,8 @@ function formatRole(role: string | null | undefined) {
 
 export default function ProcurementLayout() {
   const nav = useMemo(() => NAV_ITEMS, [])
-  const { profile, signOut } = useAuth()
+  const navigate = useNavigate()
+  const { profile, signOut, isOwner } = useAuth()
   const displayName = profile?.full_name ?? profile?.email ?? 'OptiMind User'
   const roleLabel = formatRole(profile?.role ?? 'procurement')
   const initials = getInitials(profile?.full_name ?? profile?.email)
@@ -35,6 +36,11 @@ export default function ProcurementLayout() {
   const handleLogout = async () => {
     setMenuOpen(false)
     await signOut()
+  }
+
+  const handleNavigate = (path: string) => {
+    setMenuOpen(false)
+    navigate(path)
   }
 
   return (
@@ -144,12 +150,72 @@ export default function ProcurementLayout() {
               </svg>
             </button>
             {menuOpen && (
-              <div className="absolute right-0 top-12 z-10 w-44 rounded-xl border border-slate-200 bg-white py-2 text-sm shadow-lg">
+              <div className="absolute right-0 top-12 z-10 w-56 rounded-xl border border-slate-200 bg-white py-2 text-sm shadow-lg">
+                {isOwner && (
+                  <>
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase">Switch Dashboard</div>
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('/procurement')}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                      </svg>
+                      Procurement
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('/legal')}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 3v18h18" />
+                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+                      </svg>
+                      Legal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleNavigate('/management')}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 3v18h18" />
+                        <path d="M18 17V9M13 17V5M8 17v-3" />
+                      </svg>
+                      Management
+                    </button>
+                    <div className="my-1 h-px bg-slate-200" />
+                  </>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleNavigate('/settings/company')}
+                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Company Info
+                </button>
+                <div className="my-1 h-px bg-slate-200" />
                 <button
                   type="button"
                   onClick={handleLogout}
                   className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-600 hover:bg-slate-50"
                 >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
                   Logout
                 </button>
               </div>

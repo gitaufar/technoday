@@ -44,6 +44,13 @@ const router = createBrowserRouter([
   { path: '/auth/signup', element: <Signup /> },
   { path: '/auth/select-role', element: <SelectRole /> },
   { path: '/auth/callback', element: <OAuthCallback /> },
+  // {
+  //   path: '/settings/company',
+  //   element: (
+  //     <ProtectedRoute allow={['procurement', 'legal', 'management']}>
+  //     </ProtectedRoute>
+  //   ),
+  // },
   {
     path: '/procurement',
     element: (
