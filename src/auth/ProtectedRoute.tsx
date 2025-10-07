@@ -21,22 +21,45 @@ export default function ProtectedRoute({ children, allow }: Props) {
     return <Navigate to="/auth/login" replace />
   }
 
-  if (isOwner) {
+  // Special case: /create-project is ONLY for users with null role
+  // Even owner cannot access this route
+  if (allow && allow.length === 1 && allow[0] === null) {
+    if (role !== null) {
+      // Redirect owner or role users to their appropriate dashboard
+      const redirect = isOwner ? '/owner' : '/role'
+      return <Navigate to={redirect} replace />
+    }
+  }
+
+  // Special case: If there's an allow list and owner is not in it, block owner
+  // This ensures owner can only access routes that explicitly include 'owner' in allow array
+  // or routes without any allow restrictions
+  if (allow && allow.length > 0 && isOwner) {
+    const hasOwnerInAllow = allow.includes('owner' as Role)
+    if (!hasOwnerInAllow) {
+      return <Navigate to="/owner" replace />
+    }
+  }
+
+  // If owner is accessing a route that explicitly allows owner (or no restrictions), allow it
+  if (isOwner && (!allow || allow.includes('owner' as Role))) {
     return children
   }
 
+  // Check if user is allowed to access this route based on their role
   if (allow && !allow.includes(role)) {
-    const redirect = role === 'legal' ? '/legal' 
-                   : role === 'management' ? '/management' 
-                   : role === 'procurement' ? '/procurement'
-                   : role === 'owner' ? '/owner'
-                   : '/create-project' // Default untuk role null
+    // Redirect to appropriate dashboard based on role
+    let redirect = '/create-project' // Default untuk role null
+    
+    if (isOwner) {
+      redirect = '/owner'
+    } else if (role === null) {
+      redirect = '/create-project'
+    } else {
+      redirect = '/role'
+    }
+    
     return <Navigate to={redirect} replace />
-  }
-
-  // If no role and not owner, redirect to create project
-  if (allow && !role) {
-    return <Navigate to="/create-project" replace />
   }
 
   return children

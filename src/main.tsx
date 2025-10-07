@@ -49,6 +49,9 @@ import { TeamOwner } from './routes/owner/TeamOwner'
 import { DashboardOwner } from './routes/owner/DashboardOwner'
 import { BillingOwner } from './routes/owner/BillingOwner'
 import { SettingOwner } from './routes/owner/SettingOwner'
+import RoleLayout from './routes/role/layout'
+import { DashboardHome } from './routes/role/DashboardHome'
+import { Team } from './routes/role/Team'
 
 const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
@@ -83,9 +86,21 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: '/role',
+    element: (
+      <ProtectedRoute allow={['legal', 'management', 'procurement']}>
+        <RoleLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <DashboardHome /> },
+      { path: 'team', element: <Team /> },
+    ],
+  },
+  {
     path: '/procurement',
     element: (
-      <ProtectedRoute allow={['procurement']}>
+      <ProtectedRoute allow={['procurement', 'owner']}>
         <ProcurementLayout />
       </ProtectedRoute>
     ),
@@ -100,7 +115,7 @@ const router = createBrowserRouter([
   {
     path: '/legal',
     element: (
-      <ProtectedRoute allow={['legal']}>
+      <ProtectedRoute allow={['legal', 'owner']}>
         <LegalLayout />
       </ProtectedRoute>
     ),
@@ -114,7 +129,7 @@ const router = createBrowserRouter([
   {
     path: '/management',
     element: (
-      <ProtectedRoute allow={['management']}>
+      <ProtectedRoute allow={['management', 'owner']}>
         <ManagementLayout />
       </ProtectedRoute>
     ),

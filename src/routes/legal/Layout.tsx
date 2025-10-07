@@ -170,7 +170,7 @@ export default function LegalLayout() {
                 )}
                 <button
                   type="button"
-                  onClick={() => handleNavigate('/settings/company')}
+                  onClick={() => handleNavigate('/role')}
                   className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
