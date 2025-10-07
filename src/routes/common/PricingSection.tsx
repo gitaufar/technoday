@@ -120,16 +120,18 @@ export const PricingSection = () => {
 
   return (
     <section id="pricing" className="relative isolate bg-gradient-to-b from-white via-white to-blue-50/60 py-24 scroll-mt-24">
-      <div className="animate-float-slow pointer-events-none absolute right-[8vw] sm:right-[10vw] lg:right-[14vw] top-[-160px] sm:top-[-220px] h-[300px] w-[300px] sm:h-[420px] sm:w-[420px] lg:h-[46vw] lg:w-[46vw] xl:h-[36vw] xl:w-[36vw] rounded-full bg-blue-200/40 blur-[150px]" />
-      <div className="animate-float-delayed pointer-events-none absolute right-[16vw] sm:right-[18vw] lg:right-[22vw] top-[18vh] h-[200px] w-[200px] sm:h-[260px] sm:w-[260px] lg:h-[32vw] lg:w-[32vw] xl:h-[26vw] xl:w-[26vw] rounded-full bg-blue-200/60 blur-[130px]" />
-      <div className="animate-float-reverse pointer-events-none absolute right-[12vw] sm:right-[14vw] lg:right-[18vw] bottom-[-90px] sm:bottom-[-140px] h-[260px] w-[260px] sm:h-[360px] sm:w-[360px] lg:h-[38vw] lg:w-[38vw] xl:h-[32vw] xl:w-[32vw] rounded-full bg-slate-200/50 blur-[150px]" />
-      <div className="animate-float-soft pointer-events-none absolute left-[-4vw] sm:left-[0] lg:left-[6vw] bottom-[-90px] sm:bottom-[-140px] h-[240px] w-[240px] sm:h-[320px] sm:w-[320px] lg:h-[34vw] lg:w-[34vw] xl:h-[28vw] xl:w-[28vw] rounded-full bg-blue-100/40 blur-[140px]" />
+      <div className="pointer-events-none absolute">
+        <div className="animate-float-slow absolute right-[8vw] sm:right-[10vw] lg:right-[14vw] top-[-160px] sm:top-[-220px] h-[300px] w-[300px] sm:h-[420px] sm:w-[420px] lg:h-[46vw] lg:w-[46vw] xl:h-[36vw] xl:w-[36vw] rounded-full bg-blue-200/40 blur-[150px]" />
+        <div className="animate-float-delayed absolute right-[16vw] sm:right-[18vw] lg:right-[22vw] top-[18vh] h-[200px] w-[200px] sm:h-[260px] sm:w-[260px] lg:h-[32vw] lg:w-[32vw] xl:h-[26vw] xl:w-[26vw] rounded-full bg-blue-200/60 blur-[130px]" />
+        <div className="animate-float-reverse absolute right-[12vw] sm:right-[14vw] lg:right-[18vw] bottom-[-90px] sm:bottom-[-140px] h-[260px] w-[260px] sm:h-[360px] sm:w-[360px] lg:h-[38vw] lg:w-[38vw] xl:h-[32vw] xl:w-[32vw] rounded-full bg-slate-200/50 blur-[150px]" />
+        <div className="animate-float-soft absolute left-[-4vw] sm:left-[0] lg:left-[6vw] bottom-[-90px] sm:bottom-[-140px] h-[240px] w-[240px] sm:h-[320px] sm:w-[320px] lg:h-[34vw] lg:w-[34vw] xl:h-[28vw] xl:w-[28vw] rounded-full bg-blue-100/40 blur-[140px]" />
 
-      <img
-        src="/landingpage/bubble.svg"
-        alt="floating bubbles"
-        className="animate-orbit pointer-events-none absolute -top-56 right-[-8vw] sm:right-[-4vw] lg:right-[4vw] w-[92vw] max-w-[980px]"
-      />
+        <img
+          src="/landingpage/bubble.svg"
+          alt="floating bubbles"
+          className="animate-orbit absolute -top-56 right-[-8vw] sm:right-[-4vw] lg:right-[4vw] w-[92vw] max-w-[980px]"
+        />
+      </div>
 
       <div className="relative z-10 mx-auto max-w-6xl px-6 lg:px-8">
         <div className="text-center">

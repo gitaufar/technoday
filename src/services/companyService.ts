@@ -6,12 +6,13 @@ export interface Company {
   id: string
   name: string
   code: string
-  description?: string
-  industry?: string
-  address?: string
-  phone?: string
-  email?: string
-  website?: string
+  description?: string | null
+  industry?: string | null
+  address?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
+  tax_id?: string | null
   logo_url?: string
   subscription_plan: 'basic' | 'premium' | 'enterprise'
   subscription_status: 'active' | 'suspended' | 'trial'
@@ -42,12 +43,13 @@ export interface CompanyUser {
 export interface CreateCompanyRequest {
   name: string
   code: string
-  description?: string
-  industry?: string
-  address?: string
-  phone?: string
-  email?: string
-  website?: string
+  description?: string | null
+  tax_id?: string | null
+  industry?: string | null
+  address?: string | null
+  phone?: string | null
+  email?: string | null
+  website?: string | null
   subscription_plan?: 'basic' | 'premium' | 'enterprise'
 }
 
