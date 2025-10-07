@@ -1,9 +1,15 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Check, Download, Loader2 } from "lucide-react"
 
 import { useAuth } from "@/auth/AuthProvider"
-import supabase from "@/utils/supabase"
-import { getCompanyInvoices, type InvoiceRecord } from "@/services/billingService"
+import { 
+  getCompanyInvoices, 
+  getCurrentPlan, 
+  processSubscription, 
+  downloadAllInvoices,
+  type InvoiceRecord 
+} from "@/services/billingService"
+import { SubscriptionModal } from "@/components/SubscriptionModal"
 
 type PlanKey = "basic" | "premium" | "enterprise"
 type InvoiceStatus = "paid" | "due" | "failed" | "pending" | "refunded"
@@ -37,7 +43,14 @@ const PLAN_DEFINITIONS: Record<PlanKey, PlanDefinition> = {
     label: "Professional",
     price: "$220",
     priceSuffix: "per month",
-    features: ["AI Contract Analyzer", "Risk Detection & Alerts", "KPI Dashboard", "Advanced Reporting"],
+    features: [
+      "Up to 10,000 contracts / month",
+      "AI Risk Analyzer",
+      "100 GB storage",
+      "Team collaboration & role management",
+      "Priority email support",
+      "Daily backup & 7-day log retention"
+    ],
     buttonLabel: "Choose Plan"
   },
   enterprise: {
@@ -53,6 +66,13 @@ const PLAN_DEFINITIONS: Record<PlanKey, PlanDefinition> = {
     ],
     buttonLabel: "Upgrade Plan"
   }
+}
+
+// Price mapping in IDR for modal
+const PLAN_PRICES: Record<PlanKey, number> = {
+  basic: 0,
+  premium: 250000, // Rp 250,000
+  enterprise: 470000 // Rp 470,000
 }
 
 const INVOICE_STATUS_META: Record<InvoiceStatus, { label: string; className: string }> = {
@@ -106,57 +126,117 @@ function formatDate(value: string | null | undefined): string {
 export const BillingOwner = () => {
   const { companyId } = useAuth()
 
-  const [currentPlan, setCurrentPlan] = useState<PlanKey>("premium")
+  const [currentPlan, setCurrentPlan] = useState<PlanKey>("basic")
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loadingInvoices, setLoadingInvoices] = useState(true)
   const [invoiceError, setInvoiceError] = useState<string | null>(null)
+  const [changingPlan, setChangingPlan] = useState(false)
+  const [downloadingAll, setDownloadingAll] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<PlanKey | null>(null)
 
-  useEffect(() => {
-    let ignore = false
+  const loadBillingData = useCallback(async () => {
+    if (!companyId) return
 
-    async function loadBilling() {
-      if (!companyId) {
-        setLoadingInvoices(false)
-        return
+    setLoadingInvoices(true)
+    try {
+      const [plan, invoiceRecords] = await Promise.all([
+        getCurrentPlan(companyId),
+        getCompanyInvoices(companyId)
+      ])
+
+      if (plan) {
+        setCurrentPlan((plan as PlanKey) ?? "basic")
       }
 
-      setLoadingInvoices(true)
-      try {
-        const [{ data: companyData, error: companyError }, invoiceRecords] = await Promise.all([
-          supabase.from("companies").select("subscription_plan").eq("id", companyId).maybeSingle(),
-          getCompanyInvoices(companyId)
-        ])
-
-        if (ignore) return
-
-        if (companyError) throw companyError
-
-        if (companyData?.subscription_plan) {
-          setCurrentPlan((companyData.subscription_plan as PlanKey) ?? "premium")
-        }
-
-        const mapped = (invoiceRecords ?? []).map(mapInvoiceRecordToInvoice)
-        setInvoices(mapped)
-        setInvoiceError(null)
-      } catch (error) {
-        console.error("Failed to load billing data", error)
-        if (!ignore) {
-          setInvoices([])
-          setInvoiceError("Failed to load invoices.")
-        }
-      } finally {
-        if (!ignore) {
-          setLoadingInvoices(false)
-        }
-      }
-    }
-
-    loadBilling()
-
-    return () => {
-      ignore = true
+      const mapped = (invoiceRecords ?? []).map(mapInvoiceRecordToInvoice)
+      setInvoices(mapped)
+      setInvoiceError(null)
+    } catch (error) {
+      console.error("Failed to load billing data", error)
+      setInvoices([])
+      setInvoiceError("Failed to load invoices.")
+    } finally {
+      setLoadingInvoices(false)
     }
   }, [companyId])
+
+  useEffect(() => {
+    loadBillingData()
+  }, [loadBillingData])
+
+  const handleOpenModal = (planKey: PlanKey) => {
+    if (planKey === currentPlan) return
+    setSelectedPlan(planKey)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedPlan(null)
+  }
+
+  const handlePaymentSuccess = async (paymentData: {
+    cardNumber: string
+    expirationDate: string
+    cvv: string
+    fullName: string
+    country: string
+    addressLine1: string
+    addressLine2: string
+    isBusiness: boolean
+  }) => {
+    if (!companyId || !selectedPlan) return
+
+    setChangingPlan(true)
+    try {
+      const planName = PLAN_DEFINITIONS[selectedPlan].label
+      const planPrice = PLAN_PRICES[selectedPlan]
+
+      // Determine payment method from card number (first digit)
+      const firstDigit = paymentData.cardNumber.charAt(0)
+      const paymentMethod = firstDigit === "4" ? "visa" : firstDigit === "5" ? "mastercard" : "credit_card"
+
+      // Process subscription (update plan + create invoice)
+      const result = await processSubscription(
+        companyId,
+        selectedPlan,
+        planPrice,
+        paymentMethod,
+        `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+      )
+
+      if (result.success) {
+        setCurrentPlan(selectedPlan)
+        
+        // Refresh billing data to show new invoice
+        await loadBillingData()
+        
+        alert(`Successfully subscribed to ${planName}! Invoice has been generated.`)
+      } else {
+        alert(result.error || "Failed to process subscription. Please try again.")
+      }
+    } catch (error) {
+      console.error("Error processing payment:", error)
+      alert("An error occurred while processing payment.")
+    } finally {
+      setChangingPlan(false)
+    }
+  }
+
+  const handleDownloadAll = async () => {
+    if (!companyId || downloadingAll || invoices.length === 0) return
+
+    setDownloadingAll(true)
+    try {
+      await downloadAllInvoices(companyId)
+    } catch (error) {
+      console.error("Error downloading all invoices:", error)
+      alert("Failed to download invoices. Please try again.")
+    } finally {
+      setDownloadingAll(false)
+    }
+  }
 
   const planCards = useMemo(() => {
     return (Object.keys(PLAN_DEFINITIONS) as PlanKey[]).map(planKey => {
@@ -231,7 +311,9 @@ export const BillingOwner = () => {
 
                     <button
                       type="button"
-                      className={`mt-auto inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                      onClick={() => !isCurrent && handleOpenModal(key)}
+                      disabled={isCurrent || changingPlan}
+                      className={`mt-auto inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 ${
                         isCurrent
                           ? "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
                           : key === "enterprise"
@@ -239,6 +321,7 @@ export const BillingOwner = () => {
                             : "bg-slate-100 text-slate-600 hover:bg-slate-200 focus:ring-slate-300"
                       }`}
                     >
+                      {changingPlan && !isCurrent && <Loader2 className="h-4 w-4 animate-spin" />}
                       {isCurrent ? "Current Plan" : definition.buttonLabel}
                     </button>
                 </div>
@@ -255,9 +338,15 @@ export const BillingOwner = () => {
             </div>
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-400 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              onClick={handleDownloadAll}
+              disabled={downloadingAll || invoices.length === 0}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-400 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <Download className="h-4 w-4" />
+              {downloadingAll ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
               Download All
             </button>
           </div>
@@ -352,6 +441,18 @@ export const BillingOwner = () => {
           </div>
         </section>
       </div>
+
+      {/* Subscription Modal */}
+      {selectedPlan && (
+        <SubscriptionModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          planName={PLAN_DEFINITIONS[selectedPlan].label}
+          planPrice={PLAN_PRICES[selectedPlan]}
+          planFeatures={PLAN_DEFINITIONS[selectedPlan].features}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   )
 }

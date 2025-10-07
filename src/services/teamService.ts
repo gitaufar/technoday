@@ -4,7 +4,7 @@ export type TeamMember = {
   id: string;
   full_name: string;
   email: string;
-  role: "legal" | "management" | "procurement";
+  role: "legal" | "management" | "procurement" | "owner";
   status: "active" | "pending" | "invited";
   last_login: string | null;
   avatar_url?: string;
@@ -39,7 +39,7 @@ type ProfileResponse = {
   email: string | null;
   role: string | null;
   avatar_url: string | null;
-  last_sign_in_at: string | null;
+  last_login_at: string | null;
   company_id: string | null;
 };
 
@@ -51,7 +51,7 @@ type ProfileResponse = {
 export async function getTeamMembers(companyId: string): Promise<TeamMember[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("*")
+    .select("id, full_name, email, role, avatar_url, last_login_at, company_id")
     .eq("company_id", companyId)
     .order("created_at", { ascending: false });
 
@@ -64,9 +64,9 @@ export async function getTeamMembers(companyId: string): Promise<TeamMember[]> {
     id: profile.id,
     full_name: profile.full_name || profile.email?.split('@')[0] || 'Unknown',
     email: profile.email || '',
-    role: (profile.role as 'legal' | 'management' | 'procurement') || 'management',
-    status: profile.last_sign_in_at ? 'active' : 'invited',
-    last_login: profile.last_sign_in_at,
+    role: (profile.role as 'legal' | 'management' | 'procurement' | 'owner') || 'management',
+    status: profile.last_login_at ? 'active' : 'invited',
+    last_login: profile.last_login_at,
     avatar_url: profile.avatar_url || undefined,
   })) || [];
 
@@ -105,7 +105,7 @@ export async function getTopTeamMembers(
 ): Promise<TeamMember[]> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, email, role, avatar_url, last_sign_in_at, company_id")
+    .select("id, full_name, email, role, avatar_url, last_login_at, company_id")
     .eq("company_id", companyId)
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -119,11 +119,35 @@ export async function getTopTeamMembers(
     id: profile.id,
     full_name: profile.full_name || profile.email?.split('@')[0] || 'Unknown',
     email: profile.email || '',
-    role: (profile.role as 'legal' | 'management' | 'procurement') || 'management',
-    status: profile.last_sign_in_at ? 'active' : 'invited',
-    last_login: profile.last_sign_in_at,
+    role: (profile.role as 'legal' | 'management' | 'procurement' | 'owner') || 'management',
+    status: profile.last_login_at ? 'active' : 'invited',
+    last_login: profile.last_login_at,
     avatar_url: profile.avatar_url || undefined,
   })) || [];
 
   return formattedMembers;
+}
+
+/**
+ * Update last login timestamp for a user
+ * @param userId - The ID of the user
+ * @returns True if update successful, false otherwise
+ */
+export async function updateLastLogin(userId: string): Promise<boolean> {
+  try {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ last_login_at: new Date().toISOString() })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Error updating last login:", error);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error updating last login:", error);
+    return false;
+  }
 }

@@ -16,7 +16,7 @@ export const CallToActionSection = () => {
 
   return (
     <section id="get-started" className="relative bg-[#4376C6] py-16 sm:py-20 scroll-mt-24">
-      <div className="pointer-events-none absolute inset-0 overflow-x-hidden overflow-y-visible">
+      <div className="pointer-events-none absolute inset-0">
         <div
           className="animate-float-slow absolute top-1/2 left-[-22vw] sm:left-[-14vw] lg:left-[-6vw] -translate-y-1/2 w-[560px] sm:w-[760px] lg:w-[72vw] xl:w-[58vw] 2xl:w-[50vw]"
         >

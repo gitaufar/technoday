@@ -2,8 +2,12 @@ import { useEffect, useMemo, useState } from "react"
 import { AlertTriangle, Loader2, ShieldAlert } from "lucide-react"
 
 import { useAuth } from "@/auth/AuthProvider"
-import supabase from "@/utils/supabase"
-import { deactivateCompany, updateCompany, type CreateCompanyRequest } from "@/services/companyService"
+import { 
+  deactivateCompany, 
+  updateCompany, 
+  getCompanySettings,
+  type CreateCompanyRequest 
+} from "@/services/companyService"
 
 type FormState = {
   organizationName: string
@@ -43,30 +47,18 @@ export const SettingOwner = () => {
       }
 
       try {
-        const { data, error } = await supabase.from("companies").select("*").eq("id", companyId).maybeSingle()
-
-        if (error) {
-          throw error
-        }
+        const data = await getCompanySettings(companyId)
 
         if (!ignore && data) {
-          const row = data as {
-            name?: string | null
-            description?: string | null
-            email?: string | null
-            phone?: string | null
-            tax_id?: string | null
-          }
-
-          const taxAvailable = Object.prototype.hasOwnProperty.call(row, "tax_id")
+          const taxAvailable = Object.prototype.hasOwnProperty.call(data, "tax_id")
           setSupportsTaxId(taxAvailable)
 
           setForm({
-            organizationName: row.name ?? "",
-            legalEntityName: row.description ?? "",
-            taxId: taxAvailable ? row.tax_id ?? "" : "",
-            contactEmail: row.email ?? "",
-            contactPhone: row.phone ?? ""
+            organizationName: data.name ?? "",
+            legalEntityName: data.description ?? "",
+            taxId: taxAvailable ? data.tax_id ?? "" : "",
+            contactEmail: data.email ?? "",
+            contactPhone: data.phone ?? ""
           })
         }
       } catch (error) {

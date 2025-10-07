@@ -19,7 +19,8 @@ type StatusMeta = {
 const roleOptions: RoleOption[] = [
   { value: "management", label: "Manager", badgeClass: "bg-amber-50 text-amber-600" },
   { value: "procurement", label: "Procurement", badgeClass: "bg-blue-50 text-blue-600" },
-  { value: "legal", label: "Legal", badgeClass: "bg-emerald-50 text-emerald-600" }
+  { value: "legal", label: "Legal", badgeClass: "bg-emerald-50 text-emerald-600" },
+  { value: "owner", label: "Owner", badgeClass: "bg-purple-50 text-purple-600" }
 ]
 
 const statusMap: Record<TeamMember["status"], StatusMeta> = {

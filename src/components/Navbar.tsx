@@ -153,7 +153,7 @@ export const Navbar = () => {
             </a>
             <a
               href="#get-started"
-              className="button-shimmer rounded-lg bg-gradient-to-r from-primary to-blue-600 px-5 py-2 text-sm font-semibold text-white !text-white shadow-md shadow-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/40"
+              className="button-shimmer rounded-lg bg-gradient-to-r from-primary to-blue-600 px-5 py-2 text-sm font-semibold !text-white shadow-md shadow-primary/30 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/40"
             >
               Get Started
             </a>
@@ -164,7 +164,7 @@ export const Navbar = () => {
             onClick={toggleMenu}
             aria-expanded={isOpen}
             aria-controls="mobile-nav"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-700 transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:hidden"
           >
             <div className="relative h-5 w-5">
               <Menu className={`absolute inset-0 transition-all duration-300 ${
@@ -218,7 +218,7 @@ export const Navbar = () => {
               <a
                 href="#get-started"
                 onClick={closeMenu}
-                className="button-shimmer rounded-lg bg-gradient-to-r from-primary to-blue-600 px-4 py-2.5 text-center text-sm font-semibold text-white !text-white shadow-md shadow-primary/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/40"
+                className="button-shimmer rounded-lg bg-gradient-to-r from-primary to-blue-600 px-4 py-2.5 text-center text-sm font-semibold !text-white shadow-md shadow-primary/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/40"
               >
                 Get Started
               </a>

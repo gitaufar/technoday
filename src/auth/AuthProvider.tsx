@@ -1,6 +1,7 @@
 ﻿"use client"
 import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import supabase from '@/utils/supabase'
+import { updateLastLogin } from '@/services/teamService'
 
 type Role = 'procurement' | 'legal' | 'management' | 'owner' | null
 type Profile = { 
@@ -65,6 +66,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const fetched = await fetchProfile(currentSession.user.id)
         const fetchedIsOwner = await checkIfOwner(currentSession.user.id);
+        
+        // Update last login timestamp
+        await updateLastLogin(currentSession.user.id);
         
         // Jika belum ada profile, create dengan role null sebagai default
         if (!fetched) {

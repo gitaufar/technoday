@@ -1,11 +1,13 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowRight, Building2, Loader2, Plus, Users } from "lucide-react"
 
 import { useAuth } from "@/auth/AuthProvider"
 import supabase from "@/utils/supabase"
+import { SubscriptionModal } from "@/components/SubscriptionModal"
+import { processSubscription } from "@/services/billingService"
 
 type CompanySummary = {
   id: string
@@ -46,84 +48,162 @@ const PLAN_META: Record<
   }
 }
 
+// Price mapping in IDR for modal
+const PLAN_PRICES: Record<PlanKey, number> = {
+  basic: 0,
+  premium: 250000, // Rp 250,000
+  enterprise: 470000 // Rp 470,000
+}
+
+// Plan features for modal
+const PLAN_FEATURES: Record<PlanKey, string[]> = {
+  basic: [
+    "Up to 3 users",
+    "500 contracts limit",
+    "Basic upload & tracking",
+    "Email support"
+  ],
+  premium: [
+    "Up to 25 users",
+    "2,000 contracts limit",
+    "AI Risk Analyzer",
+    "100 GB storage",
+    "Team collaboration & role management",
+    "Priority email support",
+    "Daily backup & 7-day log retention"
+  ],
+  enterprise: [
+    "Unlimited users",
+    "Unlimited contracts",
+    "Multi-company support",
+    "Advanced reports",
+    "Dedicated account manager",
+    "24/7 SLA support"
+  ]
+}
+
 export const DashboardOwner = () => {
   const navigate = useNavigate()
   const { profile, companyId } = useAuth()
   const [company, setCompany] = useState<CompanySummary | null>(null)
   const [stats, setStats] = useState<OwnerStats>({ members: 0, contracts: 0 })
   const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [upgradingPlan, setUpgradingPlan] = useState(false)
 
   const ownerName = useMemo(() => {
     const display = profile?.full_name ?? profile?.email ?? "there"
     return display.split(" ")[0]
   }, [profile?.full_name, profile?.email])
 
-  useEffect(() => {
-    let ignore = false
-
-    const fetchData = async () => {
-      if (!companyId) {
-        setLoading(false)
-        return
-      }
-
-      setLoading(true)
-
-      try {
-        const [
-          { data: companyData, error: companyError },
-          { count: membersCount, error: membersError },
-          { count: contractsCount, error: contractsError }
-        ] = await Promise.all([
-          supabase.from("companies").select("*").eq("id", companyId).maybeSingle(),
-          supabase
-            .from("company_users")
-            .select("id", { count: "exact", head: true })
-            .eq("company_id", companyId)
-            .eq("status", "active"),
-          supabase.from("contracts").select("id", { count: "exact", head: true }).eq("company_id", companyId)
-        ])
-
-        if (ignore) return
-
-        if (companyError) {
-          throw companyError
-        }
-
-        if (companyData) {
-          setCompany(companyData as CompanySummary)
-        }
-
-        if (membersError) {
-          console.error("Failed to load member count", membersError)
-        }
-
-        if (contractsError) {
-          console.error("Failed to load contract count", contractsError)
-        }
-
-        setStats({
-          members: membersCount ?? 0,
-          contracts: contractsCount ?? 0
-        })
-      } catch (error) {
-        console.error("Failed to load owner dashboard data", error)
-        setCompany(null)
-        setStats({ members: 0, contracts: 0 })
-      } finally {
-        if (!ignore) {
-          setLoading(false)
-        }
-      }
+  // Load dashboard data
+  const loadDashboardData = useCallback(async () => {
+    if (!companyId) {
+      setLoading(false)
+      return
     }
 
-    fetchData()
+    setLoading(true)
 
-    return () => {
-      ignore = true
+    try {
+      const [
+        { data: companyData, error: companyError },
+        { count: membersCount, error: membersError },
+        { count: contractsCount, error: contractsError }
+      ] = await Promise.all([
+        supabase.from("companies").select("*").eq("id", companyId).maybeSingle(),
+        supabase
+          .from("company_users")
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", companyId)
+          .eq("status", "active"),
+        supabase.from("contracts").select("id", { count: "exact", head: true }).eq("company_id", companyId)
+      ])
+
+      if (companyError) {
+        throw companyError
+      }
+
+      if (companyData) {
+        setCompany(companyData as CompanySummary)
+      }
+
+      if (membersError) {
+        console.error("Failed to load member count", membersError)
+      }
+
+      if (contractsError) {
+        console.error("Failed to load contract count", contractsError)
+      }
+
+      setStats({
+        members: membersCount ?? 0,
+        contracts: contractsCount ?? 0
+      })
+    } catch (error) {
+      console.error("Failed to load owner dashboard data", error)
+      setCompany(null)
+      setStats({ members: 0, contracts: 0 })
+    } finally {
+      setLoading(false)
     }
   }, [companyId])
 
+  const handlePaymentSuccess = async (paymentData: {
+    cardNumber: string
+    expirationDate: string
+    cvv: string
+    fullName: string
+    country: string
+    addressLine1: string
+    addressLine2: string
+    isBusiness: boolean
+  }) => {
+    if (!companyId) return
+
+    // Determine target plan (upgrade from current)
+    const targetPlan: PlanKey = planKey === "basic" ? "premium" : "enterprise"
+    
+    setUpgradingPlan(true)
+    try {
+      const planName = PLAN_META[targetPlan].label
+      const planPrice = PLAN_PRICES[targetPlan]
+
+      // Determine payment method from card number
+      const firstDigit = paymentData.cardNumber.charAt(0)
+      const paymentMethod = firstDigit === "4" ? "visa" : firstDigit === "5" ? "mastercard" : "credit_card"
+
+      // Process subscription
+      const result = await processSubscription(
+        companyId,
+        targetPlan,
+        planPrice,
+        paymentMethod,
+        `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+      )
+
+      if (result.success) {
+        // Refresh dashboard data
+        await loadDashboardData()
+        
+        alert(`Successfully upgraded to ${planName}! Your invoice has been generated.`)
+      } else {
+        alert(result.error || "Failed to upgrade plan. Please try again.")
+      }
+    } catch (error) {
+      console.error("Error upgrading plan:", error)
+      alert("An error occurred while upgrading plan.")
+    } finally {
+      setUpgradingPlan(false)
+    }
+  }
+
+  // Load data on mount
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
+
+  // Calculate plan metadata
   const planKey = (company?.subscription_plan as PlanKey) ?? "basic"
   const plan = PLAN_META[planKey] ?? PLAN_META.basic
 
@@ -132,8 +212,20 @@ export const DashboardOwner = () => {
   const userProgress =
     plan.userLimit > 0 ? Math.min(100, Math.round((stats.members / plan.userLimit) * 100)) : 100
 
+  // Navigation handlers
   const handleInviteMember = () => navigate("/owner/team")
   const handleViewCompany = () => navigate("/owner/settings")
+  
+  const handleUpgradeClick = () => {
+    // For enterprise plan, show contact message
+    if (planKey === "enterprise") {
+      alert("You are already on the Enterprise plan. Contact our sales team for custom pricing.")
+      return
+    }
+    
+    // Open modal for basic/premium users
+    setIsModalOpen(true)
+  }
 
   return (
     <div className="space-y-6">
@@ -237,9 +329,12 @@ export const DashboardOwner = () => {
 
             <button
               type="button"
-              className="w-full rounded-lg bg-[#F58A33] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e67c27]"
+              onClick={handleUpgradeClick}
+              disabled={upgradingPlan || planKey === "enterprise"}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#F58A33] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#e67c27] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Upgrade Plan
+              {upgradingPlan && <Loader2 className="h-4 w-4 animate-spin" />}
+              {planKey === "enterprise" ? "Current Plan" : "Upgrade Plan"}
             </button>
           </div>
         </section>
@@ -302,6 +397,16 @@ export const DashboardOwner = () => {
           )}
         </div>
       </section>
+
+      {/* Subscription Modal */}
+      <SubscriptionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        planName={planKey === "basic" ? "Professional" : "Enterprise"}
+        planPrice={planKey === "basic" ? PLAN_PRICES.premium : PLAN_PRICES.enterprise}
+        planFeatures={planKey === "basic" ? PLAN_FEATURES.premium : PLAN_FEATURES.enterprise}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   )
 }

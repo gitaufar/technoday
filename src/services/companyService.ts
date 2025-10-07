@@ -508,3 +508,40 @@ export const getCompanySummary = async (companyId: string): Promise<CompanySumma
     throw error
   }
 }
+
+/**
+ * Company settings details for organization settings page
+ */
+export interface CompanySettings {
+  id: string
+  name: string
+  description: string | null
+  email: string | null
+  phone: string | null
+  tax_id?: string | null
+}
+
+/**
+ * Get company details for settings page
+ * @param companyId - The ID of the company
+ * @returns Company settings details
+ */
+export const getCompanySettings = async (companyId: string): Promise<CompanySettings | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('companies')
+      .select('id, name, description, email, phone, tax_id')
+      .eq('id', companyId)
+      .maybeSingle()
+
+    if (error) {
+      console.error('Failed to load company settings:', error)
+      throw error
+    }
+
+    return data as CompanySettings | null
+  } catch (error) {
+    console.error('Error fetching company settings:', error)
+    throw error
+  }
+}
