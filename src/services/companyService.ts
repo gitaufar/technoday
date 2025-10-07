@@ -462,3 +462,47 @@ export const deactivateCompany = async (companyId: string): Promise<void> => {
     throw new Error('Authentication failed')
   }
 }
+
+/**
+ * Company summary with contract count for dashboard
+ */
+export interface CompanySummary {
+  id: string
+  name: string
+  total_contracts: number
+}
+
+/**
+ * Get company summary with contract count
+ * @param companyId - The ID of the company
+ * @returns Company summary with contract count
+ */
+export const getCompanySummary = async (companyId: string): Promise<CompanySummary | null> => {
+  try {
+    const [
+      { data: companyData, error: companyError },
+      { count: contractsCount }
+    ] = await Promise.all([
+      supabase.from('companies').select('id, name').eq('id', companyId).maybeSingle(),
+      supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('company_id', companyId)
+    ])
+
+    if (companyError) {
+      console.error('Failed to load company', companyError)
+      throw companyError
+    }
+
+    if (!companyData) {
+      return null
+    }
+
+    return {
+      id: companyData.id,
+      name: companyData.name,
+      total_contracts: contractsCount || 0
+    }
+  } catch (error) {
+    console.error('Error fetching company summary:', error)
+    throw error
+  }
+}

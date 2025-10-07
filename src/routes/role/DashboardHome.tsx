@@ -1,28 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/auth/AuthProvider'
-import supabase from '@/utils/supabase'
-
-type CompanySummary = {
-  id: string
-  name: string
-  total_contracts?: number
-}
-
-type CompanyMember = {
-  user_id: string
-  role: string
-  profiles?: {
-    full_name?: string
-    email?: string
-  }
-}
+import { getTopTeamMembers, getEmailInitial, type TeamMember } from '@/services/teamService'
+import { getCompanySummary, type CompanySummary } from '@/services/companyService'
 
 export const DashboardHome = () => {
   const { companyId } = useAuth()
   const navigate = useNavigate()
   const [company, setCompany] = useState<CompanySummary | null>(null)
-  const [members, setMembers] = useState<CompanyMember[]>([])
+  const [members, setMembers] = useState<TeamMember[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -37,42 +23,19 @@ export const DashboardHome = () => {
       setLoading(true)
 
       try {
-        const [
-          { data: companyData, error: companyError },
-          { data: membersData, error: membersError },
-          { count: contractsCount }
-        ] = await Promise.all([
-          supabase.from('companies').select('*').eq('id', companyId).maybeSingle(),
-          supabase
-            .from('company_users')
-            .select('user_id, role, profiles(full_name, email)')
-            .eq('company_id', companyId)
-            .eq('status', 'active')
-            .limit(3),
-          supabase
-            .from('contracts')
-            .select('id', { count: 'exact', head: true })
-            .eq('company_id', companyId)
+        const [companySummary, topMembers] = await Promise.all([
+          getCompanySummary(companyId),
+          getTopTeamMembers(companyId, 3)
         ])
 
         if (ignore) return
 
-        if (companyError) {
-          console.error('Failed to load company', companyError)
-        } else if (companyData) {
-          setCompany({
-            ...companyData,
-            total_contracts: contractsCount || 0
-          })
-        }
-
-        if (membersError) {
-          console.error('Failed to load members', membersError)
-        } else if (membersData) {
-          setMembers(membersData as CompanyMember[])
-        }
+        setCompany(companySummary)
+        setMembers(topMembers)
       } catch (error) {
         console.error('Error fetching data:', error)
+        setCompany(null)
+        setMembers([])
       } finally {
         if (!ignore) {
           setLoading(false)
@@ -138,27 +101,28 @@ export const DashboardHome = () => {
             <div className="p-6">
               {members && members.length > 0 ? (
                 <div className="space-y-3">
-                  {members.slice(0, 3).map((member) => (
+                  {members.map((member) => (
                     <div
-                      key={member.user_id}
+                      key={member.id}
                       className="flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-slate-300 transition"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#357ABD] to-[#4a90d9] flex items-center justify-center text-white font-semibold text-sm">
-                          {member.profiles?.full_name
-                            ? member.profiles.full_name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')
-                                .toUpperCase()
-                                .slice(0, 2)
-                            : member.profiles?.email?.[0]?.toUpperCase() || '?'}
-                        </div>
+                        {member.avatar_url ? (
+                          <img
+                            src={member.avatar_url}
+                            alt={member.full_name}
+                            className="h-10 w-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#357ABD] to-[#4a90d9] flex items-center justify-center text-white font-semibold text-sm">
+                            {getEmailInitial(member.email)}
+                          </div>
+                        )}
                         <div>
                           <div className="font-medium text-slate-900">
-                            {member.profiles?.full_name || 'Unknown User'}
+                            {member.full_name}
                           </div>
-                          <div className="text-sm text-slate-500">{member.profiles?.email}</div>
+                          <div className="text-sm text-slate-500">{member.email}</div>
                         </div>
                       </div>
                       <span
