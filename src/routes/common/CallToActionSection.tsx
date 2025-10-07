@@ -16,15 +16,17 @@ export const CallToActionSection = () => {
 
   return (
     <section id="get-started" className="relative bg-[#4376C6] py-16 sm:py-20 scroll-mt-24">
-      <div
-        className="animate-float-slow pointer-events-none absolute top-1/2 left-[-22vw] sm:left-[-14vw] lg:left-[-6vw] -translate-y-1/2 w-[560px] sm:w-[760px] lg:w-[72vw] xl:w-[58vw] 2xl:w-[50vw]"
-      >
-        <div className="absolute inset-0 rounded-full bg-white/55 blur-[260px] opacity-90" />
-        <img
-          src="/landingpage/bubble.svg"
-          alt="floating bubble"
-          className="relative w-full mix-blend-screen opacity-95 drop-shadow-[0_0_160px_rgba(255,255,255,0.5)]"
-        />
+      <div className="pointer-events-none absolute inset-0 overflow-x-hidden overflow-y-visible">
+        <div
+          className="animate-float-slow absolute top-1/2 left-[-22vw] sm:left-[-14vw] lg:left-[-6vw] -translate-y-1/2 w-[560px] sm:w-[760px] lg:w-[72vw] xl:w-[58vw] 2xl:w-[50vw]"
+        >
+          <div className="absolute inset-0 rounded-full bg-white/55 blur-[260px] opacity-90" />
+          <img
+            src="/landingpage/bubble.svg"
+            alt="floating bubble"
+            className="relative w-full mix-blend-screen opacity-95 drop-shadow-[0_0_160px_rgba(255,255,255,0.5)]"
+          />
+        </div>
       </div>
 
       <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
