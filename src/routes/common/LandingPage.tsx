@@ -8,7 +8,7 @@ import { FooterSection } from "./FooterSection"
 
 export const LandingPage = () => {
   return (
-    <main className="flex flex-col">
+    <main className="flex flex-col overflow-x-hidden">
       <Navbar />
       <AboutSection />
       <FeatureSection />
