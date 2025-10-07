@@ -1,5 +1,5 @@
 ﻿"use client"
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
 import supabase from '@/utils/supabase'
 
 type Role = 'procurement' | 'legal' | 'management' | 'owner' | null
@@ -21,6 +21,7 @@ type AuthCtx = {
   companyId: string | null
   signOut: () => Promise<void>
   isOwner: boolean
+  refresh: () => Promise<void>
 }
 
 const defaultCtx: AuthCtx = {
@@ -30,7 +31,8 @@ const defaultCtx: AuthCtx = {
   companyId: null,
   loading: true,
   signOut: async () => {},
-  isOwner: false
+  isOwner: false,
+  refresh: async () => {}
 }
 
 const Ctx = createContext<AuthCtx>(defaultCtx)
@@ -53,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [isOwner, setIsOwner] = useState(false);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase.auth.getSession()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -91,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(null)
     }
     setLoading(false)
-  }
+  }, [])
 
   useEffect(() => {
     load()
@@ -101,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       listener.subscription.unsubscribe()
     }
-  }, [])
+  }, [load])
 
   const value = useMemo<AuthCtx>(() => ({
     session,
@@ -113,8 +115,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut()
       await load()
     },
-    isOwner
-  }), [session, profile, loading])
+    isOwner,
+    refresh: load
+  }), [session, profile, loading, isOwner, load])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

@@ -1,4 +1,19 @@
+import { useNavigate } from "react-router-dom"
+import supabase from "@/utils/supabase"
+
 export const CallToActionSection = () => {
+  const navigate = useNavigate()
+  const handleAuthRedirect = () => {
+    supabase.auth
+      .signOut()
+      .catch(error => {
+        console.error("Failed to sign out before redirecting to login", error)
+      })
+      .finally(() => {
+        navigate("/auth/login")
+      })
+  }
+
   return (
     <section id="get-started" className="relative bg-[#4376C6] py-16 sm:py-20 scroll-mt-24">
       <div
@@ -22,6 +37,7 @@ export const CallToActionSection = () => {
         <div className="mt-8 flex justify-center">
           <button
             type="button"
+            onClick={handleAuthRedirect}
             className="rounded-lg bg-orange-500 px-8 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(249,115,22,0.35)] transition-colors duration-200 hover:bg-orange-600"
           >
             Try OptiMind Now

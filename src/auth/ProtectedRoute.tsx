@@ -1,9 +1,9 @@
-﻿"use client"
-import { Navigate } from 'react-router-dom'
-import { useAuth } from './AuthProvider'
-import type { ReactElement } from 'react'
+"use client"
+import { Navigate } from "react-router-dom"
+import { useAuth } from "./AuthProvider"
+import type { ReactElement } from "react"
 
-type Role = 'procurement' | 'legal' | 'management' | 'owner' | null
+type Role = "procurement" | "legal" | "management" | "owner" | null
 
 type Props = {
   children: ReactElement
@@ -14,28 +14,45 @@ export default function ProtectedRoute({ children, allow }: Props) {
   const { loading, session, role, isOwner } = useAuth()
 
   if (loading) {
-    return <div className="grid min-h-screen place-items-center bg-[#F5F7FA] text-sm text-slate-500">Loading…</div>
+    return (
+      <div className="grid min-h-screen place-items-center bg-[#F5F7FA] text-sm text-slate-500">
+        Loading.
+      </div>
+    )
   }
 
   if (!session) {
     return <Navigate to="/auth/login" replace />
   }
 
-  if (isOwner) {
-    return children
-  }
+  if (allow) {
+    if (role === null) {
+      return allow.includes(null) ? children : <Navigate to="/create-project" replace />
+    }
 
-  if (allow && !allow.includes(role)) {
-    const redirect = role === 'legal' ? '/legal' 
-                   : role === 'management' ? '/management' 
-                   : role === 'procurement' ? '/procurement'
-                   : role === 'owner' ? '/owner'
-                   : '/create-project' // Default untuk role null
+    if (allow.includes(role)) {
+      return children
+    }
+
+    const redirect =
+      role === "legal"
+        ? "/legal"
+        : role === "management"
+        ? "/management"
+        : role === "procurement"
+        ? "/procurement"
+        : role === "owner"
+        ? "/owner"
+        : "/create-project"
+
     return <Navigate to={redirect} replace />
   }
 
-  // If no role and not owner, redirect to create project
-  if (allow && !role) {
+  if (isOwner || role === "owner") {
+    return children
+  }
+
+  if (role === null) {
     return <Navigate to="/create-project" replace />
   }
 
