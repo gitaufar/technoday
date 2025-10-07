@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useMemo, useState } from 'react'
 import { useAuth } from '@/auth/AuthProvider'
-import { Home, Users, type LucideIcon } from 'lucide-react'
+import { Home, LogOut, Users, type LucideIcon } from 'lucide-react'
 import Logo from '@/assets/logo.svg'
 
 const NAV_ITEMS: Array<{ to: string; label: string; end?: boolean; icon: LucideIcon }> = [
@@ -26,7 +26,7 @@ function formatRole(role: string | null | undefined) {
 export default function RoleLayout() {
   const nav = useMemo(() => NAV_ITEMS, [])
   const navigate = useNavigate()
-  const { profile, signOut, isOwner } = useAuth()
+  const { profile, signOut, role } = useAuth()
   const displayName = profile?.full_name ?? profile?.email ?? 'OptiMind User'
   const roleLabel = formatRole(profile?.role ?? 'management')
   const initials = getInitials(profile?.full_name ?? profile?.email)
@@ -123,35 +123,53 @@ export default function RoleLayout() {
                 <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            {menuOpen && (
+           {menuOpen && (
               <div className="absolute right-0 top-12 z-10 w-56 rounded-xl border border-slate-200 bg-white py-2 text-sm shadow-lg">
-                {isOwner && (
+                {role && (
                   <>
-                    <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase">Switch Dashboard</div>
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase">My Dashboard</div>
                     <button
                       type="button"
-                      onClick={() => handleNavigate('/owner')}
+                      onClick={() => handleNavigate(
+                        role === 'legal' ? '/legal' : 
+                        role === 'management' ? '/management' : 
+                        role === 'procurement' ? '/procurement' : '/role'
+                      )}
                       className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                        <polyline points="9 22 9 12 15 12 15 22" />
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
                       </svg>
-                      Owner Dashboard
+                      {role === 'legal' ? 'Legal' : 
+                       role === 'management' ? 'Management' : 
+                       role === 'procurement' ? 'Procurement' : 'Dashboard'}
                     </button>
                     <div className="my-1 h-px bg-slate-200" />
                   </>
                 )}
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-600 hover:bg-slate-50"
+                  onClick={() => handleNavigate('/role')}
+                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-700 hover:bg-slate-50"
                 >
                   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
+                  Company Info
+                </button>
+                <div className="my-1 h-px bg-slate-200" />
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 px-4 py-2 text-left text-slate-600 transition hover:bg-slate-50"
+                >
+                  <LogOut className="h-4 w-4" />
                   Logout
                 </button>
               </div>

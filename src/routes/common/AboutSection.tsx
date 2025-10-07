@@ -1,4 +1,19 @@
+import { useNavigate } from "react-router-dom"
+import supabase from "@/utils/supabase"
+
 export const AboutSection = () => {
+  const navigate = useNavigate()
+  const handleAuthRedirect = () => {
+    supabase.auth
+      .signOut()
+      .catch(error => {
+        console.error("Failed to sign out before redirecting to login", error)
+      })
+      .finally(() => {
+        navigate("/auth/login")
+      })
+  }
+
   return (
     <section id="home" className="bg-black/40 relative h-screen overflow-hidden scroll-mt-28">
       <img
@@ -19,7 +34,11 @@ export const AboutSection = () => {
           Transform your contract lifecycle with intelligent AI-powered insights.
         </p>
         <div className="flex flex-wrap justify-center gap-6 mt-6 animate-fade-in-up animate-delay-400">
-          <button className="cursor-pointer py-4 px-6 bg-secondary rounded-md text-xl text-white shadow-lg shadow-secondary/40 transition-transform duration-300 hover:-translate-y-1">
+          <button
+            type="button"
+            onClick={handleAuthRedirect}
+            className="cursor-pointer py-4 px-6 bg-secondary rounded-md text-xl text-white shadow-lg shadow-secondary/40 transition-transform duration-300 hover:-translate-y-1"
+          >
             Get Started
           </button>
           <button className="cursor-pointer text-secondary border border-secondary rounded-md py-4 px-6 text-lg font-medium transition-colors duration-300 hover:bg-secondary hover:text-white">

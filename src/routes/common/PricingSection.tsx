@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react"
 import type { CSSProperties } from "react"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import supabase from "@/utils/supabase"
 
 import type { LucideIcon } from "lucide-react"
 import { Check, Crown, Rocket, Sparkles } from "lucide-react"
@@ -89,6 +91,17 @@ export const PricingSection = () => {
   const [hoveredDarkPlan, setHoveredDarkPlan] = useState<string | null>(null)
   const [visiblePlans, setVisiblePlans] = useState<string[]>([])
   const [activePlan, setActivePlan] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const handleAuthRedirect = () => {
+    supabase.auth
+      .signOut()
+      .catch(error => {
+        console.error("Failed to sign out before redirecting to login", error)
+      })
+      .finally(() => {
+        navigate("/auth/login")
+      })
+  }
 
   useEffect(() => {
     const timeouts = plans.map((plan, index) =>
@@ -136,7 +149,7 @@ export const PricingSection = () => {
             const cardStyle: CSSProperties = {
               "--card-accent": accent.primary,
               "--card-secondary": accent.secondary
-            }
+            } as CSSProperties
 
             return (
               <div
@@ -209,6 +222,7 @@ export const PricingSection = () => {
                   <div className="flex justify-center">
                     <button
                       type="button"
+                      onClick={handleAuthRedirect}
                       onMouseEnter={() => {
                         if (ctaVariant === "dark") setHoveredDarkPlan(name)
                       }}

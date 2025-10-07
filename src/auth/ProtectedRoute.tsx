@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 import { Navigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
 import type { ReactElement } from 'react'

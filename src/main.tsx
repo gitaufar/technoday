@@ -68,7 +68,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <NullDashboard /> },
-      { path: 'Create', element: <Create /> },
+      { path: 'create', element: <Create /> },
     ],
   },
   {
