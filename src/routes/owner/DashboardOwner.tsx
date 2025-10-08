@@ -161,7 +161,7 @@ export const DashboardOwner = () => {
   }) => {
     if (!companyId) return
 
-    // Determine target plan (upgrade from current)
+    // Determine target plan (upg rade from current)
     const targetPlan: PlanKey = planKey === "basic" ? "premium" : "enterprise"
     
     setUpgradingPlan(true)
