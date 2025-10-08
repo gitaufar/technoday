@@ -56,7 +56,7 @@ const PLAN_DEFINITIONS: Record<PlanKey, PlanDefinition> = {
   enterprise: {
     label: "Enterprise",
     price: "$470",
-    priceSuffix: "pricing",
+    priceSuffix: "per month",
     features: [
       "Unlimited users",
       "Unlimited contracts",
@@ -71,8 +71,8 @@ const PLAN_DEFINITIONS: Record<PlanKey, PlanDefinition> = {
 // Price mapping in IDR for modal
 const PLAN_PRICES: Record<PlanKey, number> = {
   basic: 0,
-  premium: 250000, // Rp 250,000
-  enterprise: 470000 // Rp 470,000
+  premium: 220, // $220
+  enterprise: 470 // $470
 }
 
 const INVOICE_STATUS_META: Record<InvoiceStatus, { label: string; className: string }> = {

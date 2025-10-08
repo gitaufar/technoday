@@ -105,7 +105,7 @@ export const SubscriptionModal = ({
   }
 
   const formatCurrency = (amount: number) => {
-    return `Rp ${amount.toLocaleString("id-ID")}`
+    return `$ ${amount.toLocaleString("en-US")}`
   }
 
   if (!isOpen) return null
