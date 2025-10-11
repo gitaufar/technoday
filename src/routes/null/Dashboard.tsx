@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import { useNavigate } from "react-router-dom"
-import { ArrowRight, Building2, Plus } from "lucide-react"
+import { ArrowRight, Building2 } from "lucide-react"
 
 import { useAuth } from "@/auth/AuthProvider"
 

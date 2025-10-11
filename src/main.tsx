@@ -12,7 +12,6 @@ import OAuthCallback from './routes/auth/Callback'
 import SelectRole from './routes/auth/SelectRole'
 
 // Null Layout for new users
-import NullLayout from './routes/null/Layout'
 import NullDashboard from './routes/null/Dashboard'
 import Create from './routes/null/Create'
 
@@ -52,6 +51,7 @@ import { SettingOwner } from './routes/owner/SettingOwner'
 import RoleLayout from './routes/role/layout'
 import { DashboardHome } from './routes/role/DashboardHome'
 import { Team } from './routes/role/Team'
+import NullLayout from './routes/null/layout'
 
 const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },

@@ -8,19 +8,10 @@ import { plans } from "@/components/Payment/item";
 
 export default function ChooseYourPlan() {
   const navigate = useNavigate();
-  const [selectedPlan, setSelectedPlan] = useState<
-    "starter" | "professional" | "enterprise"
-  >("starter");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPlanForPayment, setSelectedPlanForPayment] = useState(
     plans[0]
   );
-
-  const handlePlanSelect = (
-    plan: "starter" | "professional" | "enterprise"
-  ) => {
-    setSelectedPlan(plan);
-  };
 
   const handleSubscribeNow = (planType: string) => {
     const plan = plans.find((p) => p.id === planType) || plans[0];

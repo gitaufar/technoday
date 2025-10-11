@@ -210,13 +210,6 @@ export default function CreateNewCompany() {
     features: string[];
   } | null>(null);
 
-  const selectedPlanCard = useMemo(
-    () =>
-      planCards.find((card) => card.id === formData.defaultPlan) ??
-      planCards[0],
-    [formData.defaultPlan]
-  );
-
   const isValid = useMemo(() => {
     return (
       formData.companyName.trim().length > 2 &&
@@ -260,12 +253,6 @@ export default function CreateNewCompany() {
     }));
     setError(null);
     setStep("form");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handleBackToPlans = () => {
-    setError(null);
-    setStep("plan");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
