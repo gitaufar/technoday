@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from "react"
 import { AlertTriangle, Loader2, ShieldAlert } from "lucide-react"
 
 import { useAuth } from "@/auth/AuthProvider"
+import supabase from "@/utils/supabase"
 import { 
-  deactivateCompany, 
+  deleteCompany,
   updateCompany, 
   getCompanySettings,
   type CreateCompanyRequest 
@@ -20,7 +21,7 @@ type FormState = {
 type Feedback = { type: "success" | "error"; message: string } | null
 
 export const SettingOwner = () => {
-  const { companyId } = useAuth()
+  const { companyId, session, signOut } = useAuth()
   const [form, setForm] = useState<FormState>({
     organizationName: "",
     legalEntityName: "",
@@ -128,10 +129,12 @@ export const SettingOwner = () => {
     }
   }
 
+  
+
   const handleDelete = async () => {
     if (!companyId || deleting) return
     const confirmed = window.confirm(
-      "This will deactivate your organization and remove access for all members. Continue?"
+      "This will PERMANENTLY DELETE your organization and all related data (contracts, analyses, members). This action cannot be undone. Continue?"
     )
     if (!confirmed) return
 
@@ -139,11 +142,32 @@ export const SettingOwner = () => {
     setFeedback(null)
 
     try {
-      await deactivateCompany(companyId)
-      setFeedback({ type: "success", message: "Organization has been deactivated." })
+      // 1. Hard delete company
+      await deleteCompany(companyId)
+
+      // 2. Explicitly reset the user's profile role & company context (defensive – in case FK doesn't null role)
+      if (session?.user?.id) {
+        const { error: profileResetError } = await supabase
+          .from('profiles')
+          .update({ role: null, company_id: null })
+          .eq('id', session.user.id)
+        if (profileResetError) {
+          console.warn('Profile reset after company delete failed', profileResetError)
+        }
+      }
+
+      // 3. Sign the user out so next login goes through null onboarding flow cleanly
+      try {
+        await signOut()
+      } catch (e) {
+        console.warn('Sign out after deletion failed', e)
+      }
+
+      // 4. Redirect to login
+      window.location.href = "/auth/login"
     } catch (error) {
-      console.error("Failed to deactivate organization", error)
-      setFeedback({ type: "error", message: "Failed to deactivate organization." })
+      console.error("Failed to delete organization", error)
+      setFeedback({ type: "error", message: "Failed to delete organization." })
     } finally {
       setDeleting(false)
     }
@@ -308,7 +332,7 @@ export const SettingOwner = () => {
                   ) : (
                     <AlertTriangle className="h-4 w-4" />
                   )}
-                  Delete Organization
+                  Delete Organization Permanently
                 </button>
                 <button
                   type="button"

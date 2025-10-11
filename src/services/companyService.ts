@@ -466,6 +466,31 @@ export const deactivateCompany = async (companyId: string): Promise<void> => {
 }
 
 /**
+ * Permanently delete a company (hard delete) – this will cascade delete related rows
+ * according to the foreign key constraints (contracts, analyses, etc.).
+ * Profiles referencing this company will have company_id set to NULL (ON DELETE SET NULL).
+ * USE WITH CAUTION: this is irreversible.
+ */
+export const deleteCompany = async (companyId: string): Promise<void> => {
+  const result = await withAuthCheck(async () => {
+    const { error } = await supabase
+      .from('companies')
+      .delete()
+      .eq('id', companyId)
+
+    if (error) {
+      console.error('Error deleting company:', error)
+      throw error
+    }
+    return true
+  })
+
+  if (!result) {
+    throw new Error('Authentication failed')
+  }
+}
+
+/**
  * Company summary with contract count for dashboard
  */
 export interface CompanySummary {

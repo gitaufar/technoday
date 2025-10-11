@@ -29,7 +29,7 @@ export const SubscriptionModalDemo = () => {
     {
       id: "professional",
       name: "Professional",
-      price: 250000,
+      price: 250,
       features: [
         "Up to 10,000 contracts / month",
         "AI Risk Analyzer",
@@ -43,7 +43,7 @@ export const SubscriptionModalDemo = () => {
     {
       id: "enterprise",
       name: "Enterprise",
-      price: 470000,
+      price: 470,
       features: [
         "Unlimited users",
         "Unlimited contracts",
@@ -82,12 +82,12 @@ export const SubscriptionModalDemo = () => {
     })
     
     // Simulate invoice creation
-    alert(`Successfully subscribed to ${selectedPlan?.name} plan!\n\nPayment Details:\n- Cardholder: ${paymentData.fullName}\n- Card: **** **** **** ${paymentData.cardNumber.slice(-4)}\n- Amount: Rp ${selectedPlan?.price.toLocaleString()}`)
+    alert(`Successfully subscribed to ${selectedPlan?.name} plan!\n\nPayment Details:\n- Cardholder: ${paymentData.fullName}\n- Card: **** **** **** ${paymentData.cardNumber.slice(-4)}\n- Amount: $${selectedPlan?.price.toLocaleString()}`)
   }
 
   const formatCurrency = (amount: number) => {
     if (amount === 0) return "Free"
-    return `Rp ${amount.toLocaleString("id-ID")}`
+    return `$${amount.toLocaleString("en-US")}`
   }
 
   return (

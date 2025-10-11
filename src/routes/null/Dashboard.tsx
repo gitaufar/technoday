@@ -37,14 +37,14 @@ export default function OrganizationDashboard() {
               Set up your company profile to unlock all OptiMind features.
             </p>
           </div>
-          <button
+          {/* <button
             type="button"
             onClick={handleCreateCompany}
             className="inline-flex items-center gap-2 rounded-lg bg-[#357ABD] px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[#2e6dad]"
           >
             <Plus className="h-4 w-4" />
             Create New Company
-          </button>
+          </button> */}
         </div>
 
         <div className="px-6 pb-8">
@@ -62,7 +62,7 @@ export default function OrganizationDashboard() {
             <button
               type="button"
               onClick={handleCreateCompany}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-[#357ABD] shadow-sm transition hover:bg-[#357ABD] hover:text-white"
+              className="inline-flex items-center gap-2 rounded-[8px] bg-white px-5 py-2 text-sm font-semibold text-[#357ABD] shadow-sm transition hover:bg-[#357ABD] hover:text-white"
             >
               Set Up Company
               <ArrowRight className="h-4 w-4" />
