@@ -85,10 +85,31 @@ class ManagementService {
   // Get comprehensive KPI data for management dashboard
   async getManagementKPI(): Promise<ManagementKPIData> {
     try {
-      // Get contract counts by status
+      // Get current user's company ID
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', userId)
+        .single();
+
+      const companyId = profile?.company_id;
+      
+      if (!companyId) {
+        throw new Error('User not associated with any company');
+      }
+
+      // Get contract counts by status (filtered by company_id)
       const { data: contracts, error: contractsError } = await supabase
         .from('contracts')
-        .select('status, value_rp, risk, end_date');
+        .select('status, value_rp, risk, end_date')
+        .eq('company_id', companyId);
 
       if (contractsError) {
         console.error('Error fetching contracts for KPI:', contractsError);
@@ -187,30 +208,57 @@ class ManagementService {
     }
   }
 
-  // Get contracts list for reports table
+  // Get contracts list for reports table (filtered by company_id)
   async getContractsSummary(limit: number = 50): Promise<ContractSummary[]> {
-    const { data, error } = await supabase
-      .from('contracts')
-      .select(`
-        id,
-        name,
-        first_party,
-        second_party,
-        value_rp,
-        status,
-        end_date,
-        risk,
-        created_at
-      `)
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    try {
+      // Get current user's company ID
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
 
-    if (error) {
-      console.error('Error fetching contracts summary:', error);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', userId)
+        .single();
+
+      const companyId = profile?.company_id;
+      
+      if (!companyId) {
+        console.warn('User not associated with any company');
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from('contracts')
+        .select(`
+          id,
+          name,
+          first_party,
+          second_party,
+          value_rp,
+          status,
+          end_date,
+          risk,
+          created_at
+        `)
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching contracts summary:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getContractsSummary:', error);
       return [];
     }
-
-    return data || [];
   }
 
   // Get detailed contract information

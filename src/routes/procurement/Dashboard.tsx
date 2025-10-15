@@ -37,7 +37,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
 
 export default function ProcurementDashboard() {
   const navigate = useNavigate()
-  const { kpi, deltaPct } = useProcurementKPI()
+  const { kpi, deltaPct} = useProcurementKPI()
   const { rows } = useContractsList()
   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'submitted' | 'reviewed' | 'approved' | 'revision_requested' | 'rejected' | 'active' | 'expired'>('all')
 
@@ -112,7 +112,7 @@ export default function ProcurementDashboard() {
         />
         <MetricCard
           title="Submitted Contracts"
-          value={kpi?.pending_legal_review ?? 0}
+          value={kpi?.submitted_contracts ?? 0}
           helper="Awaiting review"
           icon={
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

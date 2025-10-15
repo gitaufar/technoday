@@ -5,6 +5,30 @@ import supabase from '../utils/supabase';
 import { withAuthCheck } from '../utils/authHelper';
 import type { Contract, ContractEntity, RiskFinding, LegalNote, LegalKPI } from '../types/db';
 
+/**
+ * Helper function to get current user's company ID
+ */
+async function getCurrentCompanyId(): Promise<string> {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+  
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('company_id')
+    .eq('id', userId)
+    .single();
+
+  if (error || !profile?.company_id) {
+    throw new Error('User not associated with any company');
+  }
+
+  return profile.company_id;
+}
+
 export interface LegalDashboardData {
   kpi: LegalKPI;
   recentContracts: Contract[];
@@ -35,29 +59,35 @@ export class LegalService {
   static async getLegalKPI(): Promise<LegalKPI> {
     return await withAuthCheck(async () => {
       try {
+        // Get current user's company ID
+        const companyId = await getCurrentCompanyId();
+
         // Hitung KPI dari data contracts yang ada
         const now = new Date();
         const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         
-        // Contracts this week
+        // Contracts this week (filtered by company_id)
         const { count: contractsThisWeek } = await supabase
           .from('contracts')
           .select('*', { count: 'exact', head: true })
+          .eq('company_id', companyId)
           .gte('created_at', weekAgo.toISOString());
 
-        // High risk contracts
+        // High risk contracts (filtered by company_id)
         const { count: highRiskCount } = await supabase
           .from('contracts')
           .select('*', { count: 'exact', head: true })
+          .eq('company_id', companyId)
           .eq('risk', 'high');
 
-        // Pending AI analysis (contracts without entities)
+        // Pending AI analysis (contracts without entities, filtered by company_id)
         const { data: contractsWithoutEntities } = await supabase
           .from('contracts')
           .select(`
             id,
             contract_entities!left(contract_id)
           `)
+          .eq('company_id', companyId)
           .is('contract_entities.contract_id', null);
 
         return {
@@ -102,59 +132,89 @@ export class LegalService {
   }
 
   /**
-   * Get recent contracts
+   * Get recent contracts (filtered by company_id)
    */
   static async getRecentContracts(limit: number = 10): Promise<Contract[]> {
-    const { data, error } = await supabase
-      .from('contracts')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    return await withAuthCheck(async () => {
+      try {
+        const companyId = await getCurrentCompanyId();
+        
+        const { data, error } = await supabase
+          .from('contracts')
+          .select('*')
+          .eq('company_id', companyId)
+          .order('created_at', { ascending: false })
+          .limit(limit);
 
-    if (error) {
-      console.error('Error fetching recent contracts:', error);
-      return [];
-    }
+        if (error) {
+          console.error('Error fetching recent contracts:', error);
+          return [];
+        }
 
-    return data || [];
+        return data || [];
+      } catch (error) {
+        console.error('Error in getRecentContracts:', error);
+        return [];
+      }
+    }) as Contract[];
   }
 
   /**
-   * Get high risk contracts
+   * Get high risk contracts (filtered by company_id)
    */
   static async getHighRiskContracts(limit: number = 10): Promise<Contract[]> {
-    const { data, error } = await supabase
-      .from('contracts')
-      .select('*')
-      .eq('risk', 'high')
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    return await withAuthCheck(async () => {
+      try {
+        const companyId = await getCurrentCompanyId();
+        
+        const { data, error } = await supabase
+          .from('contracts')
+          .select('*')
+          .eq('company_id', companyId)
+          .eq('risk', 'high')
+          .order('created_at', { ascending: false })
+          .limit(limit);
 
-    if (error) {
-      console.error('Error fetching high risk contracts:', error);
-      return [];
-    }
+        if (error) {
+          console.error('Error fetching high risk contracts:', error);
+          return [];
+        }
 
-    return data || [];
+        return data || [];
+      } catch (error) {
+        console.error('Error in getHighRiskContracts:', error);
+        return [];
+      }
+    }) as Contract[];
   }
 
   /**
-   * Get contracts pending review
+   * Get contracts pending review (filtered by company_id)
    */
   static async getPendingReviews(limit: number = 10): Promise<Contract[]> {
-    const { data, error } = await supabase
-      .from('contracts')
-      .select('*')
-      .in('status', ['pending', 'Pending Review'])
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    return await withAuthCheck(async () => {
+      try {
+        const companyId = await getCurrentCompanyId();
+        
+        const { data, error } = await supabase
+          .from('contracts')
+          .select('*')
+          .eq('company_id', companyId)
+          .in('status', ['pending', 'Pending Review'])
+          .order('created_at', { ascending: false })
+          .limit(limit);
 
-    if (error) {
-      console.error('Error fetching pending reviews:', error);
-      return [];
-    }
+        if (error) {
+          console.error('Error fetching pending reviews:', error);
+          return [];
+        }
 
-    return data || [];
+        return data || [];
+      } catch (error) {
+        console.error('Error in getPendingReviews:', error);
+        return [];
+      }
+    }) as Contract[];
   }
 
   /**

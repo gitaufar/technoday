@@ -7,7 +7,7 @@ import supabase from '@/utils/supabase'
 import CardDetailContract from '@/components/Legal/CardDetailContract'
 import RiskAnalysisCard from '@/components/Legal/RiskAnalysis'
 import LegalNotes from '@/components/Legal/LegalNotes'
-import InteractiveDocumentViewer from '@/components/Legal/AIRecommendation'
+import InteractiveDocumentViewer from '@/components/Legal/InteractiveDocumentViewer'
 
 export default function ContractDetail() {
   const { id } = useParams<{ id: string }>()
@@ -132,13 +132,10 @@ export default function ContractDetail() {
                    aiAnalysis?.risk_level?.toLowerCase() === 'medium' ? 'medium' : 'low') as 'low' | 'medium' | 'high'
       },
       {
-        title: 'Confidence Level', 
-        content: `${Math.round((aiAnalysis?.confidence || 0) * 100)}% - ${aiAnalysis?.risk_assessment?.confidence_interpretation || 'No confidence data'}`,
-        highlight: 'low' as const
-      },
-      {
-        title: 'Model Information',
-        content: `Analysis by: ${aiAnalysis?.model_used || 'AI Model'} | Processing time: ${aiAnalysis?.processing_time?.toFixed(2) || 0}s`,
+        title: 'Recommendations', 
+        content: aiAnalysis?.risk_assessment?.recommendations?.length > 0 
+          ? aiAnalysis.risk_assessment.recommendations.join('\n')
+          : 'No recommendations available',
         highlight: 'low' as const
       },
       ...aiAnalysis?.risk_factors?.map((factor: any) => ({
@@ -365,10 +362,10 @@ export default function ContractDetail() {
         </div>
         <div className="h-full">
           <InteractiveDocumentViewer
-          documentTitle={`AI Risk Analysis - ${aiRecommendationData.riskLevel} Risk (${Math.round((aiRecommendationData.confidence || 0) * 100)}% confidence)`}
-          sections={aiRecommendationData.sections}
-          suggestions={aiRecommendationData.suggestions}
-        />
+            documentTitle={`AI Risk Analysis - ${aiRecommendationData.riskLevel} Risk (${Math.round((aiRecommendationData.confidence || 0) * 100)}% confidence)`}
+            sections={aiRecommendationData.sections}
+            suggestions={aiRecommendationData.suggestions}
+          />
         </div>
       </div>
 

@@ -6,11 +6,95 @@ import type { ContractRow, ProcurementKPI, Status, Risk } from '@/types/procurem
 
 export function useProcurementKPI() {
   const [kpi, setKpi] = useState<ProcurementKPI | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     ;(async () => {
-      const { data } = await supabase.from('procurement_kpi').select('*').single()
-      setKpi(data as ProcurementKPI)
+      try {
+        setLoading(true)
+        
+        // Get current user's company ID
+        const { data: userData } = await supabase.auth.getUser()
+        const userId = userData.user?.id
+        
+        if (!userId) {
+          console.warn('User not authenticated')
+          setLoading(false)
+          return
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', userId)
+          .single()
+
+        const companyId = profile?.company_id
+        
+        if (!companyId) {
+          console.warn('User not associated with any company')
+          setLoading(false)
+          return
+        }
+
+        // Calculate KPI from contracts filtered by company_id
+        const now = new Date()
+        const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+        const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+
+        // Fetch all contracts for this company
+        const { data: allContracts } = await supabase
+          .from('contracts')
+          .select('status, created_at')
+          .eq('company_id', companyId)
+
+        if (!allContracts) {
+          setKpi({
+            new_this_month: 0,
+            new_last_month: 0,
+            submitted_contracts: 0,
+            active_contracts: 0,
+            expired_contracts: 0
+          })
+          setLoading(false)
+          return
+        }
+
+        // Count by status (case-insensitive)
+        const submitted = allContracts.filter(c => 
+          c.status?.toLowerCase() === 'submitted'
+        ).length
+
+        const active = allContracts.filter(c => 
+          c.status?.toLowerCase() === 'active' || c.status?.toLowerCase() === 'approved'
+        ).length
+
+        const expired = allContracts.filter(c => 
+          c.status?.toLowerCase() === 'expired'
+        ).length
+
+        // Count new contracts this month and last month
+        const newThisMonth = allContracts.filter(c => 
+          new Date(c.created_at) >= firstDayThisMonth
+        ).length
+
+        const newLastMonth = allContracts.filter(c => {
+          const createdDate = new Date(c.created_at)
+          return createdDate >= firstDayLastMonth && createdDate < firstDayThisMonth
+        }).length
+
+        setKpi({
+          new_this_month: newThisMonth,
+          new_last_month: newLastMonth,
+          submitted_contracts: submitted,
+          active_contracts: active,
+          expired_contracts: expired
+        })
+      } catch (error) {
+        console.error('Error fetching procurement KPI:', error)
+      } finally {
+        setLoading(false)
+      }
     })()
   }, [])
 
@@ -21,14 +105,14 @@ export function useProcurementKPI() {
     return Math.round(((new_this_month - new_last_month) / new_last_month) * 100)
   }, [kpi])
 
-  return { kpi, deltaPct }
+  return { kpi, deltaPct, loading }
 }
 
 export function useContractsList() {
   const [rows, setRows] = useState<ContractRow[]>([])
   const [loading, setLoading] = useState(true)
 
-  const checkAndUpdateExpiredContracts = async (contracts: ContractRow[]) => {
+  const checkAndUpdateExpiredContracts = async (contracts: ContractRow[], companyId: string) => {
     const currentDate = new Date()
     const expiredContracts: string[] = []
     
@@ -49,6 +133,7 @@ export function useContractsList() {
           .from('contracts')
           .update({ status: 'Expired' })
           .in('id', expiredContracts)
+          .eq('company_id', companyId)
         
         if (error) {
           console.warn('Failed to update expired contracts:', error)
@@ -62,17 +147,61 @@ export function useContractsList() {
   }
 
   const fetchAll = useCallback(async () => {
-    setLoading(true)
-    const { data } = await supabase.from('contracts').select('*').order('created_at', { ascending: false })
-    const contracts = (data ?? []) as ContractRow[]
-    
-    // Check and update expired contracts
-    await checkAndUpdateExpiredContracts(contracts)
-    
-    // Fetch updated data after potential status changes
-    const { data: updatedData } = await supabase.from('contracts').select('*').order('created_at', { ascending: false })
-    setRows((updatedData ?? []) as ContractRow[])
-    setLoading(false)
+    try {
+      setLoading(true)
+      
+      // Get current user's company ID
+      const { data: userData } = await supabase.auth.getUser()
+      const userId = userData.user?.id
+      
+      if (!userId) {
+        console.warn('User not authenticated')
+        setRows([])
+        setLoading(false)
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', userId)
+        .single()
+
+      const companyId = profile?.company_id
+      
+      if (!companyId) {
+        console.warn('User not associated with any company')
+        setRows([])
+        setLoading(false)
+        return
+      }
+
+      // Fetch contracts filtered by company_id
+      const { data } = await supabase
+        .from('contracts')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+      
+      const contracts = (data ?? []) as ContractRow[]
+      
+      // Check and update expired contracts
+      await checkAndUpdateExpiredContracts(contracts, companyId)
+      
+      // Fetch updated data after potential status changes
+      const { data: updatedData } = await supabase
+        .from('contracts')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
+      
+      setRows((updatedData ?? []) as ContractRow[])
+    } catch (error) {
+      console.error('Error fetching contracts:', error)
+      setRows([])
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => {

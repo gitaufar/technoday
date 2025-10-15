@@ -54,12 +54,37 @@ export default function RiskRadar({ findings, contractId }: { findings?: Finding
     ;(async () => {
       setLoading(true)
       try {
+        // Get current user's company ID
+        const { data: userData } = await supabase.auth.getUser()
+        const userId = userData.user?.id
+        
+        if (!userId) {
+          console.error('User not authenticated')
+          if (!cancelled) setAutoFindings([])
+          return
+        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', userId)
+          .single()
+
+        const companyId = profile?.company_id
+        
+        if (!companyId) {
+          console.warn('User not associated with any company')
+          if (!cancelled) setAutoFindings([])
+          return
+        }
+
         // 1) Tentukan kontrak target: pakai contractId jika disediakan, atau ambil kontrak terbaru yang belum reviewed
         let targetId = contractId ?? null
         if (!targetId) {
           const { data: latestList, error: cErr } = await supabase
             .from('contracts')
             .select('id')
+            .eq('company_id', companyId)
             .neq('status', 'Reviewed') // Exclude reviewed contracts
             .order('created_at', { ascending: false })
             .limit(1)

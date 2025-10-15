@@ -54,38 +54,69 @@ export default function AIContract() {
   useEffect(() => {
     ;(async () => {
       setLoading(true)
-      // 1) Ambil kontrak terbaru
-      const { data: contract, error: cErr } = await supabase
-        .from('contracts')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
-
-      if (cErr) {
-        console.error('Error fetching latest contract:', cErr)
-        setLoading(false)
-        return
-      }
-      setLatestContract(contract as Contract)
-
-      // 2) Ambil entitas hasil analisis (jika ada) untuk kontrak tersebut
-      if (contract?.id) {
-        const { data: ents, error: eErr } = await supabase
-          .from('contract_entities')
-          .select('*')
-          .eq('contract_id', contract.id)
-          .order('analyzed_at', { ascending: false })
-          .limit(1)
-
-        if (eErr) {
-          console.error('Error fetching contract entities:', eErr)
-        } else if (ents && ents.length > 0) {
-          setEntities(ents[0] as ContractEntities)
+      
+      try {
+        // Get current user's company ID
+        const { data: userData } = await supabase.auth.getUser()
+        const userId = userData.user?.id
+        
+        if (!userId) {
+          console.error('User not authenticated')
+          setLoading(false)
+          return
         }
-      }
 
-      setLoading(false)
+        // Get user's company_id from profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', userId)
+          .single()
+
+        const companyId = profile?.company_id
+        
+        if (!companyId) {
+          console.warn('User not associated with any company')
+          setLoading(false)
+          return
+        }
+
+        // 1) Ambil kontrak terbaru (filtered by company_id)
+        const { data: contract, error: cErr } = await supabase
+          .from('contracts')
+          .select('*')
+          .eq('company_id', companyId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (cErr) {
+          console.error('Error fetching latest contract:', cErr)
+          setLoading(false)
+          return
+        }
+        setLatestContract(contract as Contract)
+
+        // 2) Ambil entitas hasil analisis (jika ada) untuk kontrak tersebut
+        if (contract?.id) {
+          const { data: ents, error: eErr } = await supabase
+            .from('contract_entities')
+            .select('*')
+            .eq('contract_id', contract.id)
+            .order('analyzed_at', { ascending: false })
+            .limit(1)
+
+          if (eErr) {
+            console.error('Error fetching contract entities:', eErr)
+          } else if (ents && ents.length > 0) {
+            setEntities(ents[0] as ContractEntities)
+          }
+        }
+      } catch (error) {
+        console.error('Error in AIContract useEffect:', error)
+      } finally {
+        setLoading(false)
+      }
     })()
   }, [])
 

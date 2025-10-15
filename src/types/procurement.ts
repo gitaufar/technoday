@@ -21,7 +21,7 @@ export type ContractRow = {
 export type ProcurementKPI = {
   new_this_month: number
   new_last_month: number
-  pending_legal_review: number
-  approved_cnt: number
-  approval_rate_pct: number
+  submitted_contracts: number
+  active_contracts: number
+  expired_contracts: number
 }

@@ -51,7 +51,36 @@ export function useContracts(filter?: { status?: string; risk?: string }) {
       setLoading(true)
       setError(null)
       
-      let query = supabase.from('contracts').select('*').order('created_at', { ascending: false })
+      // Get current user's company ID
+      const { data: userData } = await supabase.auth.getUser()
+      const userId = userData.user?.id
+      
+      if (!userId) {
+        throw new Error('User not authenticated')
+      }
+
+      // Get user's company_id from profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', userId)
+        .single()
+
+      const companyId = profile?.company_id
+      
+      if (!companyId) {
+        console.warn('User not associated with any company')
+        setItems([])
+        setLoading(false)
+        return
+      }
+      
+      // Build query with company_id filter
+      let query = supabase
+        .from('contracts')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false })
       
       if (filter?.status && filter.status !== 'All') {
         query = query.eq('status', filter.status)

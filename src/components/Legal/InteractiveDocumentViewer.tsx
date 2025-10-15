@@ -55,9 +55,9 @@ function SuggestionModal({ suggestion, onClose }: { suggestion: AiSuggestion; on
 export default function InteractiveDocumentViewer({ documentTitle, sections, suggestions }: DocumentViewerProps) {
   const [selectedSuggestion, setSelectedSuggestion] = useState<AiSuggestion | null>(null);
   const highlightStyles = {
-    medium: 'bg-orange-100 border border-orange-200 rounded-md p-2 cursor-pointer hover:bg-orange-200',
-    high: 'bg-red-100 border border-red-200 rounded-md p-2 cursor-pointer hover:bg-red-200',
-    low: 'bg-green-100 border border-green-200 rounded-md p-2 cursor-pointer hover:bg-green-200',
+    medium: 'bg-orange-100 border border-orange-200 rounded-lg p-3 cursor-pointer hover:bg-orange-200 transition-colors',
+    high: 'bg-red-100 border border-red-200 rounded-lg p-3 cursor-pointer hover:bg-red-200 transition-colors',
+    low: 'bg-green-100 border border-green-200 rounded-lg p-3 cursor-pointer hover:bg-green-200 transition-colors',
   };
 
   const handleSectionClick = (section: DocumentSection) => {
@@ -75,14 +75,36 @@ export default function InteractiveDocumentViewer({ documentTitle, sections, sug
           <div className="rounded-md bg-gray-50 p-8 shadow-inner">
             <h1 className="mb-10 text-center text-xl font-bold uppercase tracking-wider text-gray-900">{documentTitle}</h1>
             <div className="space-y-6">
-              {sections.map((section, index) => (
-                <div key={index}>
-                  <h3 className="font-bold text-gray-800">{section.title}</h3>
-                  <p className={`mt-1 text-gray-700 ${section.highlight ? highlightStyles[section.highlight] : ''}`} onClick={() => section.highlight && handleSectionClick(section)}>
-                    {section.content}
-                  </p>
-                </div>
-              ))}
+              {sections.map((section, index) => {
+                // Check if content has line breaks (for recommendations list)
+                const hasLineBreaks = section.content.includes('\n');
+                const lines = hasLineBreaks ? section.content.split('\n').filter(line => line.trim()) : [section.content];
+              
+                
+                return (
+                  <div key={index}>
+                    <h3 className="mb-2 font-bold text-gray-800 flex items-center gap-2">
+                      {section.title}
+                    </h3>
+                    {hasLineBreaks ? (
+                      <ul className={`mt-2 space-y-2.5 text-sm text-gray-700 ${section.highlight ? highlightStyles[section.highlight] : 'bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4 shadow-sm'}`}>
+                        {lines.map((line, lineIndex) => (
+                          <li key={lineIndex} className="flex items-start gap-3 group">
+                            <span className="flex-1 leading-relaxed text-gray-700">{line.replace(/^\d+\.\s*/, '')}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p 
+                        className={`mt-2 text-sm text-gray-700 leading-relaxed ${section.highlight ? highlightStyles[section.highlight] : ''}`} 
+                        onClick={() => section.highlight && handleSectionClick(section)}
+                      >
+                        {section.content}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
